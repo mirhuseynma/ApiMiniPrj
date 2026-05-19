@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Core/">
+    <Project Path="ApiMiniPrj.Application/ApiMiniPrj.Application.csproj" />
+    <Project Path="ApiMiniPrj.Domain/ApiMiniPrj.Domain.csproj" />
+  </Folder>
+  <Folder Name="/src/Infrastructure/">
+    <Project Path="ApiMiniPrj.Infrastructure/ApiMiniPrj.Infrastructure.csproj" />
+    <Project Path="ApiMiniPrj.Persistence/ApiMiniPrj.Persistence.csproj" />
+  </Folder>
+  <Folder Name="/src/Presentation/">
+    <Project Path="ApiMiniPrj.Api/ApiMiniPrj.Api.csproj" />
+  </Folder>
+</Solution>
