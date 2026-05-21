@@ -1,5 +1,3 @@
-using ApiMiniPrj.Application.DTOs.Events;
-using Microsoft.AspNetCore.Http;
 
 namespace ApiMiniPrj.Application.Interfaces.Events
 {

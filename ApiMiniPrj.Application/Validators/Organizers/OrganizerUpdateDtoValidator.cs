@@ -1,11 +1,4 @@
-﻿using ApiMiniPrj.Application.DTOs.Organizers;
-using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace ApiMiniPrj.Application.Validators.Organizers
 {
     public class OrganizerUpdateDtoValidator : AbstractValidator<OrganizerUpdateDto>

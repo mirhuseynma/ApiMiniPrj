@@ -1,4 +1,3 @@
-using ApiMiniPrj.Domain.Enums;
 
 namespace ApiMiniPrj.Application.DTOs.Tickets
 {

@@ -1,18 +1,12 @@
-using ApiMiniPrj.Application.Interfaces.Common;
-using ApiMiniPrj.Application.Interfaces.Events;
-using ApiMiniPrj.Application.Interfaces.Organizers;
-using ApiMiniPrj.Application.Interfaces.Tickets;
-using ApiMiniPrj.Persistence.Context;
-using ApiMiniPrj.Persistence.Services;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+
+using ApiMiniPrj.Application.Interfaces.Auth;
+using ApiMiniPrj.Application.Interfaces.JWT;
 
 namespace ApiMiniPrj.Persistence
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddPersistence(this IServiceCollection services, IConfiguration configuration)
+        public static async Task<IServiceCollection> AddPersistence(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddDbContext<AppDbContext>(options =>
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
@@ -22,6 +16,21 @@ namespace ApiMiniPrj.Persistence
             services.AddScoped<IOrganizerService, OrganizerService>();
             services.AddScoped<ITicketService, TicketService>();
 
+            services.AddIdentity<AppUser, IdentityRole>(
+                opt =>
+                {
+                    opt.Password.RequireDigit = true;
+                    opt.Password.RequireLowercase = true;
+                    opt.Password.RequireNonAlphanumeric = false;
+                    opt.Password.RequireUppercase = true;
+                    opt.Password.RequiredLength = 8;
+                    opt.User.RequireUniqueEmail = true;
+                })
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+            services.AddScoped<IJwtService, JwtService>();
+            services.AddScoped<IAuthService, AuthService>();
+            services.AddScoped<IUserService, UserService>();
             return services;
         }
     }

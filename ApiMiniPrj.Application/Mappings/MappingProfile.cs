@@ -1,10 +1,13 @@
+
+
+using AutoMapper;
+using ApiMiniPrj.Application.DTOs.Auth;
 using ApiMiniPrj.Application.DTOs.Events;
 using ApiMiniPrj.Application.DTOs.Organizers;
 using ApiMiniPrj.Application.DTOs.Tickets;
-using ApiMiniPrj.Domain.Models.Events;
-using ApiMiniPrj.Domain.Models.Organizers;
-using ApiMiniPrj.Domain.Models.Tickets;
-using AutoMapper;
+using ApiMiniPrj.Application.DTOs.Users;
+using ApiMiniPrj.Domain.Models;
+using ApiMiniPrj.Domain.Models.Users;
 
 namespace ApiMiniPrj.Application.Mappings
 {
@@ -49,6 +52,37 @@ namespace ApiMiniPrj.Application.Mappings
             CreateMap<Ticket, GetTicketDto>();
             CreateMap<Ticket, TicketsForEventDto>()
                 .ForMember(dest => dest.IsAvailable, opt => opt.MapFrom(src => src.IsAvaiable));
+
+            // Auth DTOs
+            CreateMap<RegisterDto, AppUser>()
+                .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+                .AfterMap((src, dest) =>
+                {
+                    var nameParts = src.FullName.Split(' ');
+                    dest.FirstName = nameParts[0];
+                    dest.LastName = nameParts.Length > 1 ? nameParts[1] : string.Empty;
+                });
+
+            // User DTOs
+            CreateMap<AppUser, UserGetDto>()
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => (src.FirstName + " " + src.LastName).Trim()));
+
+            CreateMap<UserUpdateDto, AppUser>()
+                .AfterMap((src, dest) =>
+                {
+                    if (src.FullName != null)
+                    {
+                        var nameParts = src.FullName.Split(' ');
+                        dest.FirstName = nameParts[0];
+                        dest.LastName = nameParts.Length > 1 ? nameParts[1] : null;
+                    }
+                })
+                .ForMember(dest => dest.UserName, opt => opt.Condition(src => src.UserName != null))
+                .ForMember(dest => dest.Email, opt => opt.Condition(src => src.Email != null))
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore());  // Password is handled separately via UserManager
+
+
         }
     }
 }

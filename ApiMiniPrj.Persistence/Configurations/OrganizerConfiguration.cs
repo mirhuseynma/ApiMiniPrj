@@ -1,7 +1,4 @@
-﻿using ApiMiniPrj.Domain.Models.Organizers;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Builders;
-
+﻿
 namespace ApiMiniPrj.Persistence.Configurations
 {
     internal class OrganizerConfiguration : IEntityTypeConfiguration<Organizer>

@@ -1,7 +1,4 @@
-﻿using ApiMiniPrj.Domain.Models.Common;
-using ApiMiniPrj.Domain.Models.Organizers;
-using ApiMiniPrj.Domain.Models.Tickets;
-
+﻿
 namespace ApiMiniPrj.Domain.Models.Events
 {
     public class Event : AuditableEntity

@@ -1,12 +1,4 @@
-using ApiMiniPrj.Application.DTOs.Events;
-using ApiMiniPrj.Application.Interfaces.Common;
-using ApiMiniPrj.Application.Interfaces.Events;
-using ApiMiniPrj.Domain.Models.Events;
-using ApiMiniPrj.Persistence.Context;
-using AutoMapper;
-using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
+
 
 namespace ApiMiniPrj.Persistence.Services
 {
@@ -16,17 +8,30 @@ namespace ApiMiniPrj.Persistence.Services
         private readonly IFileStorageService _fileStorageService;
         private readonly IMapper _mapper;
         private readonly IValidator<EventCreateDto> _createValidator;
+        private readonly IValidator<EventUpdateDto> _updateValidator;
+        private readonly IValidator<EventBannerImageUploadDto> _bannerImageUploadValidator;
+        
 
-        public EventService(AppDbContext context, IFileStorageService fileStorageService, IMapper mapper, IValidator<EventCreateDto> createValidator)
+        public EventService(AppDbContext context, IFileStorageService fileStorageService, IMapper mapper, IValidator<EventCreateDto> createValidator, IValidator<EventUpdateDto> updateValidator, IValidator<EventBannerImageUploadDto> bannerImageUploadValidator)
         {
             _context = context;
             _fileStorageService = fileStorageService;
             _mapper = mapper;
             _createValidator = createValidator;
+            _updateValidator = updateValidator;
+            _bannerImageUploadValidator = bannerImageUploadValidator;
         }
 
         public async Task CreateEventAsync(EventCreateDto eventCreateDto)
         {
+            var validationResult = await _createValidator.ValidateAsync(eventCreateDto);
+            if(!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                var errorMessage = $"Validation failed: {string.Join(", ", errors)}";
+                throw new Exception(errorMessage);
+            }
+
             var eventEntity = _mapper.Map<Event>(eventCreateDto);
 
             if (eventCreateDto.BannerImage is not null)
@@ -49,6 +54,14 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task UpdateEventAsync(int eventId, EventUpdateDto eventUpdateDto)
         {
+            var validationResult = await _updateValidator.ValidateAsync(eventUpdateDto);
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                var errorMessage = $"Validation failed: {string.Join(", ", errors)}";
+                throw new Exception(errorMessage);
+            }
+
             var eventEntity = await GetEventEntityAsync(eventId);
 
             _mapper.Map(eventUpdateDto, eventEntity);
@@ -105,10 +118,16 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task AddBannerImageAsync(int eventId, IFormFile bannerImage)
         {
-            if (bannerImage.Length == 0)
+            var validationResult = await _bannerImageUploadValidator.ValidateAsync(new EventBannerImageUploadDto { BannerImage = bannerImage });
+
+            if (!validationResult.IsValid)
             {
-                throw new ArgumentException("Banner image is required.", nameof(bannerImage));
+                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                var errorMessage = $"Validation failed: {string.Join(", ", errors)}";
+                throw new Exception(errorMessage);
             }
+
+            
 
             var eventEntity = await _context.Events.FirstOrDefaultAsync(e => e.Id == eventId && !e.IsDeleted);
 

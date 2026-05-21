@@ -1,6 +1,4 @@
-﻿using ApiMiniPrj.Domain.Models.Common;
-using ApiMiniPrj.Domain.Models.Events;
-
+﻿
 namespace ApiMiniPrj.Domain.Models.Organizers
 {
     public class Organizer : AuditableEntity

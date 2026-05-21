@@ -1,9 +1,4 @@
-﻿using ApiMiniPrj.Application.DTOs.Organizers;
-using ApiMiniPrj.Application.Interfaces.Common;
-using ApiMiniPrj.Application.Interfaces.Organizers;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
+﻿
 namespace ApiMiniPrj.Api.Controllers.Organizers
 {
     [Route("api/[controller]")]

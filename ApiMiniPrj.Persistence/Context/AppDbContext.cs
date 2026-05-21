@@ -1,13 +1,9 @@
-using ApiMiniPrj.Application.Interfaces.Common;
-using ApiMiniPrj.Domain.Models.Common;
-using ApiMiniPrj.Domain.Models.Events;
-using ApiMiniPrj.Domain.Models.Organizers;
-using ApiMiniPrj.Domain.Models.Tickets;
-using Microsoft.EntityFrameworkCore;
+
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace ApiMiniPrj.Persistence.Context
 {
-    public class AppDbContext : DbContext, IAppDbContext
+    public class AppDbContext : IdentityDbContext<AppUser>, IAppDbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 

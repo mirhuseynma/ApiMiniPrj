@@ -1,5 +1,4 @@
-﻿using ApiMiniPrj.Application.DTOs.Tickets;
-
+﻿
 namespace ApiMiniPrj.Application.Interfaces.Tickets
 {
     public interface ITicketService

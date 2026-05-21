@@ -1,9 +1,4 @@
-﻿using ApiMiniPrj.Application.DTOs.Tickets;
-using ApiMiniPrj.Application.Interfaces.Common;
-using ApiMiniPrj.Application.Interfaces.Tickets;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
+﻿
 namespace ApiMiniPrj.Api.Controllers.Tickets
 {
     [Route("api/[controller]")]

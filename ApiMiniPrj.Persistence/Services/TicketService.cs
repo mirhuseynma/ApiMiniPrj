@@ -1,9 +1,3 @@
-using ApiMiniPrj.Application.DTOs.Tickets;
-using ApiMiniPrj.Application.Interfaces.Tickets;
-using ApiMiniPrj.Domain.Models.Tickets;
-using ApiMiniPrj.Persistence.Context;
-using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 
 namespace ApiMiniPrj.Persistence.Services
 {
@@ -11,15 +5,28 @@ namespace ApiMiniPrj.Persistence.Services
     {
         private readonly AppDbContext _context;
         private readonly IMapper _mapper;
+        private readonly IValidator<TicketCreateDto> _createValidator;
+        private readonly IValidator<TicketUpdateDto> _updateValidator;
 
-        public TicketService(AppDbContext context, IMapper mapper)
+        public TicketService(AppDbContext context, IMapper mapper, IValidator<TicketCreateDto> createValidator, IValidator<TicketUpdateDto> updateValidator)
         {
             _context = context;
             _mapper = mapper;
+            _createValidator = createValidator;
+            _updateValidator = updateValidator;
         }
 
         public async Task CreateTicketAsync(TicketCreateDto createTicketDto)
         {
+            var validationResult = await _createValidator.ValidateAsync(createTicketDto);
+
+            if (validationResult.IsValid)
+            {
+                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                var errorMessage = string.Join("; ", errors);
+                throw new Exception(errorMessage);
+            }
+
             var ticket = _mapper.Map<Ticket>(createTicketDto);
 
             await _context.Tickets.AddAsync(ticket);
@@ -28,6 +35,15 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task UpdateTicketAsync(int ticketId, TicketUpdateDto updateTicketDto)
         {
+            var validationResult = await _updateValidator.ValidateAsync(updateTicketDto);
+            if (!validationResult.IsValid)
+            {
+                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
+                var errorMessage = string.Join("; ", errors);
+                throw new Exception(errorMessage);
+            }
+
+
             var ticket = await GetTicketEntityAsync(ticketId);
 
             _mapper.Map(updateTicketDto, ticket);

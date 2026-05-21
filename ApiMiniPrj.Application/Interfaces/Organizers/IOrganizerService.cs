@@ -1,5 +1,3 @@
-using ApiMiniPrj.Application.DTOs.Organizers;
-using Microsoft.AspNetCore.Http;
 
 namespace ApiMiniPrj.Application.Interfaces.Organizers
 {

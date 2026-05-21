@@ -1,9 +1,4 @@
-﻿using ApiMiniPrj.Application.DTOs.Events;
-using ApiMiniPrj.Application.Interfaces.Common;
-using ApiMiniPrj.Application.Interfaces.Events;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
+﻿
 namespace ApiMiniPrj.Api.Controllers.Events
 {
     [Route("api/[controller]")]
@@ -60,12 +55,7 @@ namespace ApiMiniPrj.Api.Controllers.Events
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> AddBannerImage(int Id, [FromForm] EventBannerImageUploadDto request)
         {
-            if (request.BannerImage is null || request.BannerImage.Length == 0)
-            {
-                return BadRequest("Banner image is required.");
-            }
-
-            await _eventService.AddBannerImageAsync(Id, request.BannerImage);
+            await _eventService.AddBannerImageAsync(Id, request.BannerImage!);
             return Ok();
         }
     }

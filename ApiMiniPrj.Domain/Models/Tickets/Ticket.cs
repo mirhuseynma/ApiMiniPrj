@@ -1,7 +1,4 @@
-﻿using ApiMiniPrj.Domain.Enums;
-using ApiMiniPrj.Domain.Models.Common;
-using ApiMiniPrj.Domain.Models.Events;
-
+﻿
 namespace ApiMiniPrj.Domain.Models.Tickets
 {
     public class Ticket : AuditableEntity

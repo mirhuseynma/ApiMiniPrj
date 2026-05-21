@@ -1,6 +1,3 @@
-using ApiMiniPrj.Application.Interfaces.Common;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 
 namespace ApiMiniPrj.Infrastructure.Services
 {

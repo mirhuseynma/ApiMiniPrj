@@ -1,6 +1,4 @@
-using ApiMiniPrj.Application.Interfaces.Common;
-using ApiMiniPrj.Infrastructure.Services;
-using Microsoft.Extensions.DependencyInjection;
+
 
 namespace ApiMiniPrj.Infrastructure
 {

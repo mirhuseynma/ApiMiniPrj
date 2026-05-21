@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
+﻿
 namespace ApiMiniPrj.Application.DTOs.Events
 {
     public class EventCreateDto

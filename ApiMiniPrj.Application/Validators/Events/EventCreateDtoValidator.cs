@@ -1,11 +1,4 @@
-﻿using ApiMiniPrj.Application.DTOs.Events;
-using FluentValidation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace ApiMiniPrj.Application.Validators.Events
 {
     public class EventCreateDtoValidator : AbstractValidator<EventCreateDto>
