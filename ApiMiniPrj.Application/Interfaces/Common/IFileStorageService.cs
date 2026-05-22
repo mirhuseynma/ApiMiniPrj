@@ -4,6 +4,6 @@ namespace ApiMiniPrj.Application.Interfaces.Common
     public interface IFileStorageService
     {
         Task<string> SaveFileAsync(IFormFile file, string folderName, CancellationToken cancellationToken = default);
-        void DeleteFile(string? filePath);
+        void DeleteFile(string? fileName, string folderName);
     }
 }

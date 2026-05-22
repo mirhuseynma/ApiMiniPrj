@@ -1,5 +1,4 @@
 
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace ApiMiniPrj.Persistence.Context
 {

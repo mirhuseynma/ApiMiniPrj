@@ -1,14 +1,3 @@
-
-
-using AutoMapper;
-using ApiMiniPrj.Application.DTOs.Auth;
-using ApiMiniPrj.Application.DTOs.Events;
-using ApiMiniPrj.Application.DTOs.Organizers;
-using ApiMiniPrj.Application.DTOs.Tickets;
-using ApiMiniPrj.Application.DTOs.Users;
-using ApiMiniPrj.Domain.Models;
-using ApiMiniPrj.Domain.Models.Users;
-
 namespace ApiMiniPrj.Application.Mappings
 {
     public class MappingProfile : Profile
@@ -26,9 +15,14 @@ namespace ApiMiniPrj.Application.Mappings
                 .ForMember(dest => dest.Tickets, opt => opt.Ignore())
                 .ForAllMembers(opt => opt.Condition((_, _, sourceMember) => sourceMember is not null));
 
-            CreateMap<Event, GetEventDto>();
-            CreateMap<Event, EventsForOrganizerDto>();
-            CreateMap<Event, EventForTicketDto>();
+            CreateMap<Event, GetEventDto>()
+                .ForMember(dest => dest.BannerImageUrl, opt => opt.MapFrom<EventImageUrlResolver<GetEventDto>, string?>(src => src.BannerImageUrl));
+
+            CreateMap<Event, EventsForOrganizerDto>()
+                .ForMember(dest => dest.BannerImageUrl, opt => opt.MapFrom<EventImageUrlResolver<EventsForOrganizerDto>, string?>(src => src.BannerImageUrl));
+
+            CreateMap<Event, EventForTicketDto>()
+                .ForMember(dest => dest.BannerImageUrl, opt => opt.MapFrom<EventImageUrlResolver<EventForTicketDto>, string?>(src => src.BannerImageUrl));
 
             CreateMap<OrganizerCreateDto, Organizer>()
                 .ForMember(dest => dest.LogoUrl, opt => opt.Ignore())
@@ -39,8 +33,11 @@ namespace ApiMiniPrj.Application.Mappings
                 .ForMember(dest => dest.Events, opt => opt.Ignore())
                 .ForAllMembers(opt => opt.Condition((_, _, sourceMember) => sourceMember is not null));
 
-            CreateMap<Organizer, GetOrganizerDto>();
-            CreateMap<Organizer, OrganizerForEventDto>();
+            CreateMap<Organizer, GetOrganizerDto>()
+                .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom<OrganizerLogoUrlResolver<GetOrganizerDto>, string?>(src => src.LogoUrl));
+
+            CreateMap<Organizer, OrganizerForEventDto>()
+                .ForMember(dest => dest.LogoUrl, opt => opt.MapFrom<OrganizerLogoUrlResolver<OrganizerForEventDto>, string?>(src => src.LogoUrl));
 
             CreateMap<TicketCreateDto, Ticket>()
                 .ForMember(dest => dest.Event, opt => opt.Ignore());
@@ -60,8 +57,16 @@ namespace ApiMiniPrj.Application.Mappings
                 .AfterMap((src, dest) =>
                 {
                     var nameParts = src.FullName.Split(' ');
-                    dest.FirstName = nameParts[0];
-                    dest.LastName = nameParts.Length > 1 ? nameParts[1] : string.Empty;
+                    if (nameParts.Length > 1 )
+                    {
+                        dest.FirstName = nameParts[0];
+                        dest.LastName = nameParts[1];
+                    }
+                    else
+                    {
+                        dest.FirstName = src.FullName;
+                        dest.LastName = string.Empty;
+                    }
                 });
 
             // User DTOs
@@ -81,6 +86,8 @@ namespace ApiMiniPrj.Application.Mappings
                 .ForMember(dest => dest.UserName, opt => opt.Condition(src => src.UserName != null))
                 .ForMember(dest => dest.Email, opt => opt.Condition(src => src.Email != null))
                 .ForMember(dest => dest.PasswordHash, opt => opt.Ignore());  // Password is handled separately via UserManager
+
+
 
 
         }

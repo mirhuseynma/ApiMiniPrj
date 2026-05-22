@@ -1,10 +1,4 @@
-﻿using ApiMiniPrj.Application.DTOs.Users;
-using ApiMiniPrj.Application.Interfaces.User;
-using ApiMiniPrj.Domain.Models.Users;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
-
+﻿
 namespace ApiMiniPrj.Api.Controllers.Users
 {
     [Route("api/[controller]")]
@@ -60,9 +54,8 @@ namespace ApiMiniPrj.Api.Controllers.Users
             await _userService.UpdateAsync(email, userUpdateDto);
             return Ok("User updated successfully");
         }
-
-        [HttpDelete("delete")]
-        public async Task<IActionResult> DeleteUser(string email)
+        [HttpDelete("email")]
+        public async Task<IActionResult> DeleteUser([FromQuery] string email)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrWhiteSpace(userId)) return Unauthorized("User ID not found in token");

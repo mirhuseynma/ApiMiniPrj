@@ -46,12 +46,12 @@ namespace ApiMiniPrj.Infrastructure.Services
             await using var stream = new FileStream(physicalPath, FileMode.CreateNew);
             await file.CopyToAsync(stream, cancellationToken);
 
-            return $"/uploads/{folderName}/{fileName}";
+            return fileName;
         }
 
-        public void DeleteFile(string? filePath)
+        public void DeleteFile(string? fileName, string folderName)
         {
-            if (string.IsNullOrWhiteSpace(filePath))
+            if (string.IsNullOrWhiteSpace(fileName))
             {
                 return;
             }
@@ -62,7 +62,13 @@ namespace ApiMiniPrj.Infrastructure.Services
                 webRootPath = Path.Combine(_environment.ContentRootPath, "wwwroot");
             }
 
-            var relativePath = filePath.TrimStart('/', '\\').Replace('/', Path.DirectorySeparatorChar);
+            var storedFileName = Path.GetFileName(fileName);
+            if (string.IsNullOrWhiteSpace(storedFileName))
+            {
+                return;
+            }
+
+            var relativePath = Path.Combine("uploads", folderName, storedFileName);
             var physicalPath = Path.GetFullPath(Path.Combine(webRootPath, relativePath));
             var rootPath = Path.GetFullPath(webRootPath);
 

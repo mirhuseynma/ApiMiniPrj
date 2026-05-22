@@ -1,8 +1,12 @@
-﻿namespace ApiMiniPrj.Application.Interfaces.Auth
+﻿
+namespace ApiMiniPrj.Application.Interfaces.Auth
 {
     public interface IAuthService
     {
-        Task RegisterAsync (RegisterDto registerDto);
+        Task<string> RegisterAsync (RegisterDto registerDto);
         Task<ResponseDto> LoginAsync(LoginDto loginDto);
+        Task ConfirmEmailAsync(ConfirmEmailDto confirmEmailDto);
+        Task<string> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
+        Task ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
     }
 }

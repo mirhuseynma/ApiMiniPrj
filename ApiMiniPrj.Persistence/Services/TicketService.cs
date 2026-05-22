@@ -1,4 +1,6 @@
 
+using Microsoft.AspNetCore.Http.HttpResults;
+
 namespace ApiMiniPrj.Persistence.Services
 {
     public class TicketService : ITicketService
@@ -18,19 +20,15 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task CreateTicketAsync(TicketCreateDto createTicketDto)
         {
-            var validationResult = await _createValidator.ValidateAsync(createTicketDto);
 
-            if (validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
-                var errorMessage = string.Join("; ", errors);
-                throw new Exception(errorMessage);
-            }
-
+            var eventExists = await _context.Events.FirstOrDefaultAsync(e => e.Id == createTicketDto.EventId) ?? throw new Exception("Event not found.");
             var ticket = _mapper.Map<Ticket>(createTicketDto);
 
             await _context.Tickets.AddAsync(ticket);
             await _context.SaveChangesAsync();
+
+
+
         }
 
         public async Task UpdateTicketAsync(int ticketId, TicketUpdateDto updateTicketDto)
@@ -64,12 +62,7 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(t => t.Event)
                 .FirstOrDefaultAsync(t => t.Id == ticketId && !t.IsDeleted);
 
-            if (ticket is null)
-            {
-                throw new KeyNotFoundException("Ticket not found.");
-            }
-
-            return _mapper.Map<GetTicketDto>(ticket);
+            return ticket is null ? throw new KeyNotFoundException("Ticket not found.") : _mapper.Map<GetTicketDto>(ticket);
         }
 
         public async Task<IEnumerable<GetTicketDto>> GetAllTicketsAsync()
@@ -86,12 +79,7 @@ namespace ApiMiniPrj.Persistence.Services
         {
             var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId && !t.IsDeleted);
 
-            if (ticket is null)
-            {
-                throw new KeyNotFoundException("Ticket not found.");
-            }
-
-            return ticket;
+            return ticket is null ? throw new KeyNotFoundException("Ticket not found.") : ticket;
         }
     }
 }

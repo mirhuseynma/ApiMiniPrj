@@ -7,11 +7,15 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
     {
         private readonly ITicketService _ticketService;
         private readonly IAppDbContext _context;
+        private readonly IValidator<TicketCreateDto> _createValidator;
+        private readonly IValidator<TicketUpdateDto> _updateValidator;
 
-        public TicketController(ITicketService ticketService, IAppDbContext appDbContext)
+        public TicketController(ITicketService ticketService, IAppDbContext appDbContext, IValidator<TicketCreateDto> createValidator, IValidator<TicketUpdateDto> updateValidator)
         {
             _ticketService = ticketService;
             _context = appDbContext;
+            _createValidator = createValidator;
+            _updateValidator = updateValidator;
         }
 
         [HttpGet]
@@ -24,6 +28,12 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
         [HttpPost]
         public async Task<IActionResult> Post([FromForm] TicketCreateDto ticketCreateDto)
         {
+            var validationResult = await _createValidator.ValidateAsync(ticketCreateDto);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            }
             await _ticketService.CreateTicketAsync(ticketCreateDto);
             return Ok();
         }

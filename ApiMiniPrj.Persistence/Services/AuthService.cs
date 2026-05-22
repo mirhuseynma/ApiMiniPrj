@@ -1,52 +1,35 @@
-﻿using ApiMiniPrj.Application.DTOs.Auth;
-using ApiMiniPrj.Application.Interfaces.Auth;
-using ApiMiniPrj.Application.Interfaces.JWT;
-
+﻿
 namespace ApiMiniPrj.Persistence.Services
 {
     public class AuthService : IAuthService
     {
         private readonly IJwtService _jwtService;
         private readonly UserManager<AppUser> _userManager;
-        private readonly IValidator<LoginDto> _loginValidator;
-        private readonly IValidator<RegisterDto> _registerValidator;
+        private readonly JwtSetting jwtSettings;
 
-        public AuthService(IJwtService jwtService, UserManager<AppUser> userManager, IValidator<LoginDto> loginValidator, IValidator<RegisterDto> registerValidator)
+        public AuthService(IJwtService jwtService, UserManager<AppUser> userManager, IOptions<JwtSetting> options)
         {
             _jwtService = jwtService;
             _userManager = userManager;
-            _loginValidator = loginValidator;
-            _registerValidator = registerValidator;
+            jwtSettings = options.Value;
         }
         public async Task<ResponseDto> LoginAsync(LoginDto loginDto)
         {
-            var validationResult = _loginValidator.Validate(loginDto);
-            if (!validationResult.IsValid)
-            {
-                var errors = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
-                throw new ArgumentException(errors);
-            }
-
-            var user = await _userManager.FindByEmailAsync(loginDto.EmailOrUsername) ?? await _userManager.FindByNameAsync(loginDto.EmailOrUsername);
-            if (user is null ) throw new ArgumentException("User not found.");
-            if (user is not null && !await _userManager.CheckPasswordAsync(user, loginDto.Password)) throw new ArgumentException("Invalid email/username or password."); 
+            var user = (await _userManager.FindByEmailAsync(loginDto.EmailOrUsername) ?? await _userManager.FindByNameAsync(loginDto.EmailOrUsername)) ?? throw new ArgumentException("User not found.");
+            if (user is not null && !await _userManager.CheckPasswordAsync(user, loginDto.Password)) throw new ArgumentException("Invalid email/username or password.");
+            if (!await _userManager.IsEmailConfirmedAsync(user!)) throw new ArgumentException("Email not confirmed. Please confirm your email before logging in.");
             var token = await _jwtService.GenerateTokenAsync(user!);
             return new ResponseDto
             {
                 Token = token,
-                ExpirationDate = DateTime.UtcNow.AddMinutes(1) 
+                ExpirationDate = DateTime.UtcNow.AddMinutes(jwtSettings.ExpirationMinutes)
             };
         }
 
-        public async Task RegisterAsync(RegisterDto registerDto)
+        public async Task<string> RegisterAsync(RegisterDto registerDto)
         {
-            var validationResult = _registerValidator.Validate(registerDto);
-            if (!validationResult.IsValid)
-            {
-                var errors  = string.Join(", ", validationResult.Errors.Select(e => e.ErrorMessage));
-                throw new ArgumentException(errors);
-            }
 
+            
             var user = new AppUser
             {
                 UserName = registerDto.UserName,
@@ -60,7 +43,52 @@ namespace ApiMiniPrj.Persistence.Services
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 throw new ArgumentException(errors);
             }
-            await _userManager.AddToRoleAsync(user, "User");    
+            await _userManager.AddToRoleAsync(user, "User");
+
+            var confirmationToken = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+            confirmationToken = WebUtility.UrlEncode(confirmationToken);
+            return confirmationToken;
+        }
+
+        public async Task ConfirmEmailAsync(ConfirmEmailDto confirmEmailDto)
+        {
+            var user = await _userManager.FindByEmailAsync(confirmEmailDto.Email) ?? throw new ArgumentException("User not found.");
+            var decodedToken = WebUtility.UrlDecode(confirmEmailDto.Token);
+            var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
+            if (!result.Succeeded)
+            {
+                throw new ArgumentException("Email confirmation failed. Invalid token.");
+            }
+        }
+
+        public async Task<string> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto)
+        {
+            var user = await _userManager.FindByEmailAsync(forgotPasswordDto.Email);
+            if (user == null || !(await _userManager.IsEmailConfirmedAsync(user)))
+            {
+                throw new ArgumentException("User not found or email not confirmed.");
+            }
+            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+            token = WebUtility.UrlEncode(token);
+            return token;
+        }
+
+        public async Task ResetPasswordAsync(ResetPasswordDto resetPasswordDto)
+        {
+            var user = await _userManager.FindByEmailAsync(resetPasswordDto.Email) ?? throw new ArgumentException("User not found.");
+            if (resetPasswordDto.NewPassword != resetPasswordDto.ConfirmPassword)
+            {
+                throw new ArgumentException("New password and confirm password do not match.");
+            }
+
+            var decodedToken = WebUtility.UrlDecode(resetPasswordDto.Token);
+            var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPasswordDto.NewPassword);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                throw new ArgumentException($"Password reset failed: {errors}");
+            }
         }
     }
 }

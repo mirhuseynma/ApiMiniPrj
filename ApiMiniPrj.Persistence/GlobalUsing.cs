@@ -31,6 +31,24 @@ global using ApiMiniPrj.Application.Interfaces.User;
 
 
 
+global using ApiMiniPrj.Application.Common.Settings;
+global using ApiMiniPrj.Application.DTOs.Auth;
+global using ApiMiniPrj.Application.Interfaces.Auth;
+global using ApiMiniPrj.Application.Interfaces.JWT;
+global using Microsoft.Extensions.Options;
+global using System.Net;
+
+
+global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+
+global using System;
+
+global using Microsoft.IdentityModel.Tokens;
+global using System.IdentityModel.Tokens.Jwt;
+global using System.Security.Claims;
+global using System.Text;
+
+global using ApiMiniPrj.Application.DTOs.Users;
 
 
 

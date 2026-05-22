@@ -10,6 +10,8 @@ global using FluentValidation;
 global using ApiMiniPrj.Domain.Models.Events;
 global using ApiMiniPrj.Application.DTOs.Auth;
 global using ApiMiniPrj.Application.DTOs.Users;
+global using ApiMiniPrj.Domain.Models.Users;
+
 
 
 

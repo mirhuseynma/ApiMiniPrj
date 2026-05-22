@@ -31,6 +31,7 @@ namespace ApiMiniPrj.Persistence
             services.AddScoped<IJwtService, JwtService>();
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<IUserService, UserService>();
+
             return services;
         }
     }

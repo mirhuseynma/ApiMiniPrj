@@ -1,4 +1,5 @@
 ﻿using ApiMiniPrj.Application.Common.Settings;
+using ApiMiniPrj.Application.Mappings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,7 +13,10 @@ namespace ApiMiniPrj.Application
         public static IServiceCollection AddApplication(this IServiceCollection services,IConfiguration configuration)
         {
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
+            services.AddHttpContextAccessor();
             services.AddAutoMapper(cfg => cfg.AddMaps(typeof(DependencyInjection).Assembly));
+            services.AddTransient(typeof(EventImageUrlResolver<>));
+            services.AddTransient(typeof(OrganizerLogoUrlResolver<>));
             services.AddValidatorsFromAssembly(typeof(DependencyInjection).Assembly);
             services.Configure<JwtSetting>(configuration.GetSection("JwtSettings"));
             services.AddAuthentication(options =>
@@ -30,6 +34,7 @@ namespace ApiMiniPrj.Application
                     ValidIssuer = configuration["JwtSettings:Issuer"],
                     ValidAudience = configuration["JwtSettings:Audience"],
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JwtSettings:SecretKey"]!)),
+                    ClockSkew = TimeSpan.Zero
                 };
             });
             return services;

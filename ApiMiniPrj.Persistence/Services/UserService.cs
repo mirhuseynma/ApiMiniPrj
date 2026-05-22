@@ -1,9 +1,4 @@
 ﻿
-using ApiMiniPrj.Application.DTOs.Users;
-using ApiMiniPrj.Application.Interfaces.User;
-using ApiMiniPrj.Domain.Models.Users;
-using Microsoft.AspNetCore.Identity;
-
 namespace ApiMiniPrj.Persistence.Services
 {
     public class UserService : IUserService
@@ -23,10 +18,9 @@ namespace ApiMiniPrj.Persistence.Services
         }
         public async Task DeleteAsync(string email)
         {
-            if (email == null) throw new ArgumentNullException(nameof(email));
             var existingUser = await _userManager.FindByEmailAsync(email);
-            if (existingUser != null && await _userManager.IsInRoleAsync(existingUser, "User")) await _userManager.DeleteAsync(existingUser);
-            throw new Exception("User not found");
+            if (existingUser != null)  await _userManager.DeleteAsync(existingUser); 
+            else throw new Exception("User not found");
         }
 
         public async Task<List<UserGetDto>> GetAllAsync()
@@ -39,19 +33,14 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task<UserGetDto> GetByEmailAsync(string email)
         {
-            if (email == null) throw new ArgumentNullException(nameof(email));
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) throw new Exception("User not found");
+            var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception("User not found");
             return _mapper.Map<UserGetDto>(user);
         }
 
 
         public async Task UpdateAsync(string email, UserUpdateDto userUpdateDto)
         {
-            if (email == null) throw new ArgumentNullException(nameof(email));
-
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) throw new Exception("User not found");
+            var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception("User not found");
 
             // Validate the update DTO
             var validationResult = await _updateValidator.ValidateAsync(userUpdateDto);

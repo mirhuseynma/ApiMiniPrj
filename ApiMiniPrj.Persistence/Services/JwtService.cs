@@ -1,11 +1,4 @@
-﻿using ApiMiniPrj.Application.Common.Settings;
-using ApiMiniPrj.Application.Interfaces.JWT;
-using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-
+﻿
 namespace ApiMiniPrj.Persistence.Services
 {
     public class JwtService : IJwtService
@@ -24,10 +17,10 @@ namespace ApiMiniPrj.Persistence.Services
 
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user.UserName!),
-                new Claim(ClaimTypes.Email, user.Email!),
-                new Claim("FullName", user.FullName!),
+                new(ClaimTypes.NameIdentifier, user.Id),
+                new(ClaimTypes.Name, user.UserName!),
+                new(ClaimTypes.Email, user.Email!),
+                new("FullName", user.FullName!),
             };
 
             foreach (var role in roles) claims.Add(new Claim(ClaimTypes.Role, role));

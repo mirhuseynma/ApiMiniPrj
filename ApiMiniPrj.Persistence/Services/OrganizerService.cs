@@ -45,7 +45,7 @@ namespace ApiMiniPrj.Persistence.Services
         {
             var organizer = await GetOrganizerEntityAsync(id);
 
-            _fileStorageService.DeleteFile(organizer.LogoUrl);
+            _fileStorageService.DeleteFile(organizer.LogoUrl, "organizers");
             _context.Organizers.Remove(organizer);
             await _context.SaveChangesAsync();
         }
@@ -66,7 +66,7 @@ namespace ApiMiniPrj.Persistence.Services
 
             if (updateOrganizerDto.Logo is not null)
             {
-                _fileStorageService.DeleteFile(organizer.LogoUrl);
+                _fileStorageService.DeleteFile(organizer.LogoUrl, "organizers");
                 organizer.LogoUrl = await _fileStorageService.SaveFileAsync(updateOrganizerDto.Logo, "organizers");
             }
 
@@ -79,12 +79,7 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(o => o.Events.Where(e => !e.IsDeleted))
                 .FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted);
 
-            if (organizer is null)
-            {
-                throw new KeyNotFoundException("Organizer not found.");
-            }
-
-            return _mapper.Map<GetOrganizerDto>(organizer);
+            return organizer is null ? throw new KeyNotFoundException("Organizer not found.") : _mapper.Map<GetOrganizerDto>(organizer);
         }
 
         public async Task<IEnumerable<GetOrganizerDto>> GetAllOrganizersAsync()
@@ -112,16 +107,10 @@ namespace ApiMiniPrj.Persistence.Services
                 throw new ArgumentException("Logo is required.", nameof(logo));
             }
 
-            var organizer = await _context.Organizers.FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted);
-
-            if (organizer is null)
-            {
-                throw new KeyNotFoundException("Organizer not found.");
-            }
-
+            var organizer = await _context.Organizers.FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted) ?? throw new KeyNotFoundException("Organizer not found.");
             if (organizer.LogoUrl is not null)
             {
-                _fileStorageService.DeleteFile(organizer.LogoUrl);
+                _fileStorageService.DeleteFile(organizer.LogoUrl, "organizers");
             }
 
             var logoUrl = await _fileStorageService.SaveFileAsync(logo, "organizers");
@@ -134,14 +123,9 @@ namespace ApiMiniPrj.Persistence.Services
         {
             var organizer = await _context.Organizers.FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted);
 
-            if (organizer is null)
-            {
-                throw new KeyNotFoundException("Organizer not found.");
-            }
-
-            return organizer;
+            return organizer is null ? throw new KeyNotFoundException("Organizer not found.") : organizer;
         }
 
-        
+
     }
 }

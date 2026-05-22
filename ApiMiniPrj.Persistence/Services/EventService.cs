@@ -24,6 +24,7 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task CreateEventAsync(EventCreateDto eventCreateDto)
         {
+            
             var validationResult = await _createValidator.ValidateAsync(eventCreateDto);
             if(!validationResult.IsValid)
             {
@@ -32,6 +33,7 @@ namespace ApiMiniPrj.Persistence.Services
                 throw new Exception(errorMessage);
             }
 
+            var organizer = _context.Organizers.FirstOrDefault(o => o.Id == eventCreateDto.OrganizerId) ?? throw new Exception("organizer not found");
             var eventEntity = _mapper.Map<Event>(eventCreateDto);
 
             if (eventCreateDto.BannerImage is not null)
@@ -47,7 +49,7 @@ namespace ApiMiniPrj.Persistence.Services
         {
             var eventEntity = await GetEventEntityAsync(eventId);
 
-            _fileStorageService.DeleteFile(eventEntity.BannerImageUrl);
+            _fileStorageService.DeleteFile(eventEntity.BannerImageUrl, "events");
             _context.Events.Remove(eventEntity);
             await _context.SaveChangesAsync();
         }
@@ -68,7 +70,7 @@ namespace ApiMiniPrj.Persistence.Services
 
             if (eventUpdateDto.BannerImage is not null)
             {
-                _fileStorageService.DeleteFile(eventEntity.BannerImageUrl);
+                _fileStorageService.DeleteFile(eventEntity.BannerImageUrl, "events");
                 eventEntity.BannerImageUrl = await _fileStorageService.SaveFileAsync(eventUpdateDto.BannerImage, "events");
             }
 
@@ -82,12 +84,7 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(e => e.Tickets.Where(t => !t.IsDeleted))
                 .FirstOrDefaultAsync(e => e.Id == eventId && !e.IsDeleted);
 
-            if (eventEntity is null)
-            {
-                throw new KeyNotFoundException("Event not found.");
-            }
-
-            return _mapper.Map<GetEventDto>(eventEntity);
+            return eventEntity is null ? throw new KeyNotFoundException("Event not found.") : _mapper.Map<GetEventDto>(eventEntity);
         }
 
         public async Task<List<GetEventDto>> GetAllEventsAsync()
@@ -108,12 +105,7 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(e => e.Tickets.Where(t => !t.IsDeleted))
                 .FirstOrDefaultAsync(e => e.Title == title && !e.IsDeleted);
 
-            if (eventEntity is null)
-            {
-                throw new KeyNotFoundException("Event not found.");
-            }
-
-            return _mapper.Map<GetEventDto>(eventEntity);
+            return eventEntity is null ? throw new KeyNotFoundException("Event not found.") : _mapper.Map<GetEventDto>(eventEntity);
         }
 
         public async Task AddBannerImageAsync(int eventId, IFormFile bannerImage)
@@ -127,18 +119,12 @@ namespace ApiMiniPrj.Persistence.Services
                 throw new Exception(errorMessage);
             }
 
-            
 
-            var eventEntity = await _context.Events.FirstOrDefaultAsync(e => e.Id == eventId && !e.IsDeleted);
 
-            if (eventEntity is null)
-            {
-                throw new KeyNotFoundException("Event not found.");
-            }
-
+            var eventEntity = await _context.Events.FirstOrDefaultAsync(e => e.Id == eventId && !e.IsDeleted) ?? throw new KeyNotFoundException("Event not found.");
             if (eventEntity.BannerImageUrl is not null)
             {
-                _fileStorageService.DeleteFile(eventEntity.BannerImageUrl);
+                _fileStorageService.DeleteFile(eventEntity.BannerImageUrl, "events");
             }
 
             var bannerImageUrl = await _fileStorageService.SaveFileAsync(bannerImage, "events");
@@ -154,12 +140,7 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(e => e.Tickets.Where(t => !t.IsDeleted))
                 .FirstOrDefaultAsync(e => e.Id == eventId && !e.IsDeleted);
 
-            if (eventEntity is null)
-            {
-                throw new KeyNotFoundException("Event not found.");
-            }
-
-            return eventEntity;
+            return eventEntity is null ? throw new KeyNotFoundException("Event not found.") : eventEntity;
         }
     }
 }

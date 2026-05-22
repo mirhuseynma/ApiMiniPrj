@@ -14,6 +14,7 @@ namespace ApiMiniPrj.Application.Validators.Organizers
                 .MaximumLength(100).WithMessage("Organizer email cannot exceed 100 characters.");
             RuleFor(x => x.PhoneNumber)
                 .NotEmpty().WithMessage("Organizer phone number is required.")
+                .Matches(@"^\+994\d{9}$").WithMessage("Phone number must be in format +994XXXXXXXXX (where X is a digit).")
                 .MaximumLength(20).WithMessage("Organizer phone number cannot exceed 20 characters.");
             
         }
