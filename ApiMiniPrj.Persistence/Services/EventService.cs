@@ -24,14 +24,6 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task CreateEventAsync(EventCreateDto eventCreateDto)
         {
-            
-            var validationResult = await _createValidator.ValidateAsync(eventCreateDto);
-            if(!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
-                var errorMessage = $"Validation failed: {string.Join(", ", errors)}";
-                throw new Exception(errorMessage);
-            }
 
             var organizer = _context.Organizers.FirstOrDefault(o => o.Id == eventCreateDto.OrganizerId) ?? throw new Exception("organizer not found");
             var eventEntity = _mapper.Map<Event>(eventCreateDto);
@@ -55,15 +47,7 @@ namespace ApiMiniPrj.Persistence.Services
         }
 
         public async Task UpdateEventAsync(int eventId, EventUpdateDto eventUpdateDto)
-        {
-            var validationResult = await _updateValidator.ValidateAsync(eventUpdateDto);
-            if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
-                var errorMessage = $"Validation failed: {string.Join(", ", errors)}";
-                throw new Exception(errorMessage);
-            }
-
+        { 
             var eventEntity = await GetEventEntityAsync(eventId);
 
             _mapper.Map(eventUpdateDto, eventEntity);
@@ -94,8 +78,9 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(e => e.Organizer)
                 .Include(e => e.Tickets.Where(t => !t.IsDeleted))
                 .ToListAsync();
+            
 
-            return _mapper.Map<List<GetEventDto>>(events);
+            return events is null ? throw new KeyNotFoundException("Events not found.") : _mapper.Map<List<GetEventDto>>(events);
         }
 
         public async Task<GetEventDto> GetEventByTitle(string title)
@@ -110,17 +95,7 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task AddBannerImageAsync(int eventId, IFormFile bannerImage)
         {
-            var validationResult = await _bannerImageUploadValidator.ValidateAsync(new EventBannerImageUploadDto { BannerImage = bannerImage });
-
-            if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
-                var errorMessage = $"Validation failed: {string.Join(", ", errors)}";
-                throw new Exception(errorMessage);
-            }
-
-
-
+            
             var eventEntity = await _context.Events.FirstOrDefaultAsync(e => e.Id == eventId && !e.IsDeleted) ?? throw new KeyNotFoundException("Event not found.");
             if (eventEntity.BannerImageUrl is not null)
             {

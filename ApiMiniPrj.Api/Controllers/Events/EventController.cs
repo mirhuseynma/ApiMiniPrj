@@ -1,4 +1,7 @@
 ﻿
+using ApiMiniPrj.Application.Validators.Events;
+using Azure.Core;
+
 namespace ApiMiniPrj.Api.Controllers.Events
 {
     [Route("api/[controller]")]
@@ -6,14 +9,16 @@ namespace ApiMiniPrj.Api.Controllers.Events
     public class EventController : ControllerBase
     {
         private readonly IEventService _eventService;
-        private readonly IAppDbContext _context;
-        private readonly IFileStorageService _filestorageService;
+        private readonly IValidator<EventCreateDto> _createValidator;
+        private readonly IValidator<EventUpdateDto> _updateValidator;
+        private readonly IValidator<EventBannerImageUploadDto> _bannerImageUploadValidator;
 
-        public EventController(IEventService eventService, IAppDbContext appDbContext, IFileStorageService filestorageService)
+        public EventController(IEventService eventService, IValidator<EventCreateDto> createValidator, IValidator<EventUpdateDto> updateValidator, IValidator<EventBannerImageUploadDto> bannerImageUploadValidator)
         {
             _eventService = eventService;
-            _context = appDbContext;
-            _filestorageService = filestorageService;
+            _createValidator = createValidator;
+            _updateValidator = updateValidator;
+            _bannerImageUploadValidator = bannerImageUploadValidator;
         }
 
         [HttpGet]
@@ -26,6 +31,9 @@ namespace ApiMiniPrj.Api.Controllers.Events
         [HttpPost]
         public async Task<IActionResult> Post([FromForm] EventCreateDto eventCreateDto)
         {
+            var validationResult = await _createValidator.ValidateAsync(eventCreateDto);
+            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            
             await _eventService.CreateEventAsync(eventCreateDto);
             return Ok();
         }
@@ -40,6 +48,8 @@ namespace ApiMiniPrj.Api.Controllers.Events
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromForm] EventUpdateDto eventUpdateDto)
         {
+            var validationResult = await _updateValidator.ValidateAsync(eventUpdateDto);
+            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
             await _eventService.UpdateEventAsync(id, eventUpdateDto);
             return Ok();
         }
@@ -55,6 +65,8 @@ namespace ApiMiniPrj.Api.Controllers.Events
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> AddBannerImage(int Id, [FromForm] EventBannerImageUploadDto request)
         {
+            var validationResult = await _bannerImageUploadValidator.ValidateAsync(request);
+            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
             await _eventService.AddBannerImageAsync(Id, request.BannerImage!);
             return Ok();
         }

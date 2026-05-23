@@ -6,21 +6,18 @@ namespace ApiMiniPrj.Api.Controllers.Auth
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
-        private readonly UserManager<AppUser> _userManager;
         private readonly IValidator<RegisterDto> _registerValidator;
         private readonly IValidator<LoginDto> _loginValidator;
         private readonly IValidator<ConfirmEmailDto> _confirmEmailValidator;
         private readonly IValidator<ForgotPasswordDto> _forgotPasswordValidator;
         private readonly IValidator<ResetPasswordDto> _resetPasswordValidator;
-        private readonly IMapper _mapper;
-        public AuthController(IAuthService authService, UserManager<AppUser> userManager, IValidator<LoginDto> loginValidator, IValidator<RegisterDto> registerValidator, IValidator<ConfirmEmailDto> confirmEmailValidator, IMapper mapper, IValidator<ForgotPasswordDto> forgotPasswordValidator, IValidator<ResetPasswordDto> resetPasswordValidator)
+
+        public AuthController(IAuthService authService, IValidator<LoginDto> loginValidator, IValidator<RegisterDto> registerValidator, IValidator<ConfirmEmailDto> confirmEmailValidator, IValidator<ForgotPasswordDto> forgotPasswordValidator, IValidator<ResetPasswordDto> resetPasswordValidator)
         {
             _authService = authService;
-            _userManager = userManager;
             _loginValidator = loginValidator;
             _registerValidator = registerValidator;
             _confirmEmailValidator = confirmEmailValidator;
-            _mapper = mapper;
             _forgotPasswordValidator = forgotPasswordValidator;
             _resetPasswordValidator = resetPasswordValidator;
         }
@@ -28,17 +25,9 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromForm] RegisterDto registerDto)
         {
-            if (registerDto == null) return BadRequest("Register data is required.");
             var validationResult = await _registerValidator.ValidateAsync(registerDto);
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
-            }
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
+            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            
             var result = await _authService.RegisterAsync(registerDto);
             return Ok(result);
         }
@@ -48,10 +37,8 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         public async Task<IActionResult> Login([FromForm] LoginDto loginDto)
         {
             var validationResult = await _loginValidator.ValidateAsync(loginDto);
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
-            }
+            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            
             var response = await _authService.LoginAsync(loginDto);
             return Ok(response);
         }
@@ -61,11 +48,8 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         public async Task<IActionResult> ConfirmEmail([FromForm] ConfirmEmailDto confirmEmailDto)
         {
             var validationResult = await _confirmEmailValidator.ValidateAsync(confirmEmailDto);
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
-            }
-
+            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            
             await _authService.ConfirmEmailAsync(confirmEmailDto);
             return Ok("Email confirmed successfully.");
         }
@@ -75,10 +59,8 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         public async Task<IActionResult> ForgotPassword([FromForm] ForgotPasswordDto forgotPasswordDto)
         {
             var validationResult = await _forgotPasswordValidator.ValidateAsync(forgotPasswordDto);
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
-            }
+            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            
 
             var result = await _authService.ForgotPasswordAsync(forgotPasswordDto);
 
@@ -91,10 +73,8 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         public async Task<IActionResult> ResetPassword([FromForm] ResetPasswordDto resetPasswordDto)
         {
             var validationResult = await _resetPasswordValidator.ValidateAsync(resetPasswordDto);
-            if (!validationResult.IsValid)
-            {
-                return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
-            }
+            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            
 
             await _authService.ResetPasswordAsync(resetPasswordDto);
 

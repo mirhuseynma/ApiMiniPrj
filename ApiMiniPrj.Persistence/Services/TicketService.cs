@@ -1,6 +1,3 @@
-
-using Microsoft.AspNetCore.Http.HttpResults;
-
 namespace ApiMiniPrj.Persistence.Services
 {
     public class TicketService : ITicketService
@@ -33,17 +30,7 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task UpdateTicketAsync(int ticketId, TicketUpdateDto updateTicketDto)
         {
-            var validationResult = await _updateValidator.ValidateAsync(updateTicketDto);
-            if (!validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
-                var errorMessage = string.Join("; ", errors);
-                throw new Exception(errorMessage);
-            }
-
-
             var ticket = await GetTicketEntityAsync(ticketId);
-
             _mapper.Map(updateTicketDto, ticket);
             await _context.SaveChangesAsync();
         }
@@ -51,7 +38,6 @@ namespace ApiMiniPrj.Persistence.Services
         public async Task DeleteTicketAsync(int ticketId)
         {
             var ticket = await GetTicketEntityAsync(ticketId);
-
             _context.Tickets.Remove(ticket);
             await _context.SaveChangesAsync();
         }
@@ -62,7 +48,7 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(t => t.Event)
                 .FirstOrDefaultAsync(t => t.Id == ticketId && !t.IsDeleted);
 
-            return ticket is null ? throw new KeyNotFoundException("Ticket not found.") : _mapper.Map<GetTicketDto>(ticket);
+            return  _mapper.Map<GetTicketDto>(ticket);
         }
 
         public async Task<IEnumerable<GetTicketDto>> GetAllTicketsAsync()
@@ -72,7 +58,7 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(t => t.Event)
                 .ToListAsync();
 
-            return _mapper.Map<IEnumerable<GetTicketDto>>(tickets);
+            return tickets is null ? throw new KeyNotFoundException("No tickets found.") : _mapper.Map<IEnumerable<GetTicketDto>>(tickets);
         }
 
         private async Task<Ticket> GetTicketEntityAsync(int ticketId)

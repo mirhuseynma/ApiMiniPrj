@@ -6,30 +6,16 @@ namespace ApiMiniPrj.Persistence.Services
         private readonly AppDbContext _context;
         private readonly IFileStorageService _fileStorageService;
         private readonly IMapper _mapper;
-        private readonly IValidator<OrganizerCreateDto> _createValidator;
-        private readonly IValidator<OrganizerUpdateDto> _updateValidator;   
-        private readonly IValidator<OrganizerUploadLogo> _uploadLogoValidator;
 
-        public OrganizerService(AppDbContext context, IFileStorageService fileStorageService, IMapper mapper, IValidator<OrganizerCreateDto> createValidator, IValidator<OrganizerUpdateDto> updateValidator, IValidator<OrganizerUploadLogo> uploadLogoValidator)
+        public OrganizerService(AppDbContext context, IFileStorageService fileStorageService, IMapper mapper)
         {
             _context = context;
             _fileStorageService = fileStorageService;
             _mapper = mapper;
-            _createValidator = createValidator;
-            _updateValidator = updateValidator;
-            _uploadLogoValidator = uploadLogoValidator;
         }
 
         public async Task CreateOrganizerAsync(OrganizerCreateDto createOrganizerDto)
         {
-            var validationResult = await _createValidator.ValidateAsync(createOrganizerDto);
-            if ( !validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
-                var errorMessage = string.Join("; ", errors);
-                throw new Exception(errorMessage);
-            }
-
             var organizer = _mapper.Map<Organizer>(createOrganizerDto);
 
             if (createOrganizerDto.Logo is not null)
@@ -52,14 +38,6 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task UpdateOrganizerAsync(int id, OrganizerUpdateDto updateOrganizerDto)
         {
-            var validationResult = await _updateValidator.ValidateAsync(updateOrganizerDto);
-            if (validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
-                var errorMessage = string.Join("; ", errors);
-                throw new Exception(errorMessage);
-            }
-
             var organizer = await GetOrganizerEntityAsync(id);
 
             _mapper.Map(updateOrganizerDto, organizer);
@@ -89,19 +67,11 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(o => o.Events.Where(e => !e.IsDeleted))
                 .ToListAsync();
 
-            return _mapper.Map<IEnumerable<GetOrganizerDto>>(organizers);
+            return organizers is null ? throw new KeyNotFoundException("No organizers found.") : _mapper.Map<IEnumerable<GetOrganizerDto>>(organizers);
         }
 
         public async Task OrganizerUploadLogo(int id, IFormFile logo)
         {
-            var validationResult = await _uploadLogoValidator.ValidateAsync(new OrganizerUploadLogo { Logo = logo });
-            if (validationResult.IsValid)
-            {
-                var errors = validationResult.Errors.Select(e => e.ErrorMessage).ToList();
-                var errorMessage = string.Join("; ", errors);
-                throw new Exception(errorMessage);
-            }
-
             if (logo.Length == 0)
             {
                 throw new ArgumentException("Logo is required.", nameof(logo));

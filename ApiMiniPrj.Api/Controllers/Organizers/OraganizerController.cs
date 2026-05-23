@@ -6,14 +6,16 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
     public class OraganizerController : ControllerBase
     {
         private readonly IOrganizerService _organizerService;
-        private readonly IAppDbContext _context;
-        private readonly IFileStorageService _filestorageService;
+        private readonly IValidator<OrganizerCreateDto> _createValidator;
+        private readonly IValidator<OrganizerUpdateDto> _updateValidator;
+        private readonly IValidator<OrganizerUploadLogo> _uploadLogoValidator;
 
-        public OraganizerController(IOrganizerService organizerService, IAppDbContext appDbContext, IFileStorageService filestorageService)
+        public OraganizerController(IOrganizerService organizerService, IValidator<OrganizerCreateDto> createValidator, IValidator<OrganizerUpdateDto> updateValidator, IValidator<OrganizerUploadLogo> uploadLogoValidator)
         {
             _organizerService = organizerService;
-            _context = appDbContext;
-            _filestorageService = filestorageService;
+            _createValidator = createValidator;
+            _updateValidator = updateValidator;
+            _uploadLogoValidator = uploadLogoValidator;
         }
 
         [HttpGet]
@@ -26,6 +28,9 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         [HttpPost]
         public async Task<IActionResult> Post([FromForm] OrganizerCreateDto organizerCreateDto)
         {
+            var validationResult = await _createValidator.ValidateAsync(organizerCreateDto);
+            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            
             await _organizerService.CreateOrganizerAsync(organizerCreateDto);
             return Ok();
         }
@@ -40,6 +45,8 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromForm] OrganizerUpdateDto organizerUpdateDto)
         {
+            var validationResult = await _updateValidator.ValidateAsync(organizerUpdateDto);
+            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
             await _organizerService.UpdateOrganizerAsync(id, organizerUpdateDto);
             return Ok();
         }
@@ -54,6 +61,8 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         [HttpPost("{id:int}/logo")]
         public async Task<IActionResult> UploadLogo(int id, [FromForm] OrganizerUploadLogo logo)
         {
+            var validationResult = await _uploadLogoValidator.ValidateAsync(logo);
+            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
             if (logo.Logo is null || logo.Logo.Length == 0)
             {
                 return BadRequest("Logo file is required.");

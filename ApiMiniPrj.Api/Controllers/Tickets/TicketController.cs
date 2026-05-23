@@ -48,6 +48,13 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
         [HttpPut("{id:int}")]
         public async Task<IActionResult> Put(int id, [FromForm] TicketUpdateDto ticketUpdateDto)
         {
+            var validationResult = await _updateValidator.ValidateAsync(ticketUpdateDto);
+
+            if (!validationResult.IsValid)
+            {
+                return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            }
+
             await _ticketService.UpdateTicketAsync(id, ticketUpdateDto);
             return Ok();
         }

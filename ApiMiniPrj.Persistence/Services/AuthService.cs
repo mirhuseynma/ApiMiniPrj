@@ -40,8 +40,8 @@ namespace ApiMiniPrj.Persistence.Services
             var result = await _userManager.CreateAsync(user, registerDto.Password);
             if (!result.Succeeded)
             {
-                var errors = string.Join(", ", result.Errors.Select(e => e.Description));
-                throw new ArgumentException(errors);
+                // Collect error messages and throw an exception
+                throw new ArgumentException("User registration failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
             }
             await _userManager.AddToRoleAsync(user, "User");
 
