@@ -80,5 +80,12 @@ namespace ApiMiniPrj.Api.Controllers.Auth
 
             return Ok("Password reset successful.");
         }
+
+        [HttpPost("refresh-token")]
+        public async Task<IActionResult> RefreshToken([FromForm] RefreshTokenDto refreshTokenRequestDto)
+        {
+            var response = await _authService.RefreshTokenAsync(refreshTokenRequestDto);
+            return Ok(response);
+        }
     }
 }

@@ -1,7 +1,4 @@
 
-using ApiMiniPrj.Application.Interfaces.Auth;
-using ApiMiniPrj.Application.Interfaces.JWT;
-
 namespace ApiMiniPrj.Persistence
 {
     public static class DependencyInjection

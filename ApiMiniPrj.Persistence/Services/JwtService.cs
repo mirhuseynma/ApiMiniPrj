@@ -24,7 +24,7 @@ namespace ApiMiniPrj.Persistence.Services
             };
 
             foreach (var role in roles) claims.Add(new Claim(ClaimTypes.Role, role));
-            
+
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSetting.SecretKey));
 
             var signingCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
@@ -45,6 +45,14 @@ namespace ApiMiniPrj.Persistence.Services
             return tokenHandler.WriteToken(token);
 
 
+        }
+
+        public async Task<string> GenerateRefreshTokenAsync()
+        {
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
         }
     }
 }

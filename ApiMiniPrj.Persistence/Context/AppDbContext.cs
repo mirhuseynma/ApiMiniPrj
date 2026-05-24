@@ -1,5 +1,4 @@
 
-
 namespace ApiMiniPrj.Persistence.Context
 {
     public class AppDbContext : IdentityDbContext<AppUser>, IAppDbContext
@@ -9,7 +8,7 @@ namespace ApiMiniPrj.Persistence.Context
         public DbSet<Event> Events => Set<Event>();
         public DbSet<Organizer> Organizers => Set<Organizer>();
         public DbSet<Ticket> Tickets => Set<Ticket>();
-
+        public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(AppDbContext).Assembly);

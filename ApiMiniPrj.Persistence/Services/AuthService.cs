@@ -6,12 +6,14 @@ namespace ApiMiniPrj.Persistence.Services
         private readonly IJwtService _jwtService;
         private readonly UserManager<AppUser> _userManager;
         private readonly JwtSetting jwtSettings;
+        private readonly AppDbContext _context;
 
-        public AuthService(IJwtService jwtService, UserManager<AppUser> userManager, IOptions<JwtSetting> options)
+        public AuthService(IJwtService jwtService, UserManager<AppUser> userManager, IOptions<JwtSetting> options, AppDbContext appDbContext)
         {
             _jwtService = jwtService;
             _userManager = userManager;
             jwtSettings = options.Value;
+            _context = appDbContext;
         }
         public async Task<ResponseDto> LoginAsync(LoginDto loginDto)
         {
@@ -19,17 +21,27 @@ namespace ApiMiniPrj.Persistence.Services
             if (user is not null && !await _userManager.CheckPasswordAsync(user, loginDto.Password)) throw new ArgumentException("Invalid email/username or password.");
             if (!await _userManager.IsEmailConfirmedAsync(user!)) throw new ArgumentException("Email not confirmed. Please confirm your email before logging in.");
             var token = await _jwtService.GenerateTokenAsync(user!);
+            var refreshToken = await _jwtService.GenerateRefreshTokenAsync();
+            await _context.Set<RefreshToken>().AddAsync(new RefreshToken
+            {
+                UserId = user!.Id,
+                Token = refreshToken,
+                Expires = DateTime.UtcNow.AddDays(15),
+                CreatedAt = DateTime.UtcNow
+            });
+            await _context.SaveChangesAsync();
             return new ResponseDto
             {
                 Token = token,
-                ExpirationDate = DateTime.UtcNow.AddMinutes(jwtSettings.ExpirationMinutes)
+                ExpirationDate = DateTime.UtcNow.AddMinutes(jwtSettings.ExpirationMinutes),
+                RefreshToken = refreshToken
             };
         }
 
         public async Task<string> RegisterAsync(RegisterDto registerDto)
         {
 
-            
+
             var user = new AppUser
             {
                 UserName = registerDto.UserName,
@@ -89,6 +101,45 @@ namespace ApiMiniPrj.Persistence.Services
                 var errors = string.Join(", ", result.Errors.Select(e => e.Description));
                 throw new ArgumentException($"Password reset failed: {errors}");
             }
+        }
+
+        public async Task<ResponseDto> RefreshTokenAsync(RefreshTokenDto refreshTokenRequestDto)
+        {
+            var oldRefreshToken = await _context.Set<RefreshToken>().Include(rt => rt.User).FirstOrDefaultAsync(rt => rt.Token == refreshTokenRequestDto.RefreshToken) ?? throw new ArgumentException("Invalid refresh token.");
+            var now = DateTime.UtcNow;
+
+            if (oldRefreshToken.IsExpired || oldRefreshToken.Expires <= now)
+            {
+                _context.Set<RefreshToken>().Remove(oldRefreshToken);
+                await _context.SaveChangesAsync();
+                throw new ArgumentException("Refresh token has expired.");
+            }
+
+            var newJwtToken = await _jwtService.GenerateTokenAsync(oldRefreshToken.User!);
+            var newRefreshToken = await _jwtService.GenerateRefreshTokenAsync();
+
+            var userRefreshTokens = await _context.Set<RefreshToken>()
+                .Where(rt => rt.UserId == oldRefreshToken.UserId)
+                .ToListAsync();
+
+            _context.Set<RefreshToken>().RemoveRange(userRefreshTokens);
+
+            await _context.Set<RefreshToken>().AddAsync(new RefreshToken
+            {
+                UserId = oldRefreshToken.UserId,
+                Token = newRefreshToken,
+                Expires = now.AddDays(15),
+                CreatedAt = now
+            });
+
+            await _context.SaveChangesAsync();
+
+            return new ResponseDto
+            {
+                Token = newJwtToken,
+                ExpirationDate = now.AddMinutes(jwtSettings.ExpirationMinutes),
+                RefreshToken = newRefreshToken
+            };
         }
     }
 }

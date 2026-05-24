@@ -8,7 +8,7 @@ namespace ApiMiniPrj.Domain.Models
         public DateTime Expires { get; set; }
         public string UserId { get; set; } = null!;
         public AppUser? User { get; set; }
-        public bool IsExpired => DateTime.UtcNow >= Expires;
+        public bool IsExpired { get; set; }
         public DateTime CreatedAt { get; set; }
 
     }

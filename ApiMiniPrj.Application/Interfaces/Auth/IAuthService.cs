@@ -8,5 +8,6 @@ namespace ApiMiniPrj.Application.Interfaces.Auth
         Task ConfirmEmailAsync(ConfirmEmailDto confirmEmailDto);
         Task<string> ForgotPasswordAsync(ForgotPasswordDto forgotPasswordDto);
         Task ResetPasswordAsync(ResetPasswordDto resetPasswordDto);
+        Task<ResponseDto> RefreshTokenAsync(RefreshTokenDto refreshTokenRequestDto);
     }
 }

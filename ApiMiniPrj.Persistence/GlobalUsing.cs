@@ -39,6 +39,10 @@ global using Microsoft.Extensions.Options;
 global using System.Net;
 
 
+global using System.Security.Cryptography;
+
+
+
 global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 global using System;
@@ -49,6 +53,8 @@ global using System.Security.Claims;
 global using System.Text;
 
 global using ApiMiniPrj.Application.DTOs.Users;
+global using ApiMiniPrj.Domain.Models;
+
 
 
 
