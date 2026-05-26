@@ -6,9 +6,9 @@ namespace ApiMiniPrj.Persistence.Services
         private readonly IJwtService _jwtService;
         private readonly UserManager<AppUser> _userManager;
         private readonly JwtSetting jwtSettings;
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
 
-        public AuthService(IJwtService jwtService, UserManager<AppUser> userManager, IOptions<JwtSetting> options, AppDbContext appDbContext)
+        public AuthService(IJwtService jwtService, UserManager<AppUser> userManager, IOptions<JwtSetting> options, IAppDbContext appDbContext)
         {
             _jwtService = jwtService;
             _userManager = userManager;
@@ -22,7 +22,7 @@ namespace ApiMiniPrj.Persistence.Services
             if (!await _userManager.IsEmailConfirmedAsync(user!)) throw new ArgumentException("Email not confirmed. Please confirm your email before logging in.");
             var token = await _jwtService.GenerateTokenAsync(user!);
             var refreshToken = await _jwtService.GenerateRefreshTokenAsync();
-            await _context.Set<RefreshToken>().AddAsync(new RefreshToken
+            await _context.RefreshTokens.AddAsync(new RefreshToken
             {
                 UserId = user!.Id,
                 Token = refreshToken,
@@ -66,6 +66,7 @@ namespace ApiMiniPrj.Persistence.Services
         public async Task ConfirmEmailAsync(ConfirmEmailDto confirmEmailDto)
         {
             var user = await _userManager.FindByEmailAsync(confirmEmailDto.Email) ?? throw new ArgumentException("User not found.");
+            if (user.EmailConfirmed) throw new ArgumentException("Email is already confirmed.");
             var decodedToken = WebUtility.UrlDecode(confirmEmailDto.Token);
             var result = await _userManager.ConfirmEmailAsync(user, decodedToken);
             if (!result.Succeeded)

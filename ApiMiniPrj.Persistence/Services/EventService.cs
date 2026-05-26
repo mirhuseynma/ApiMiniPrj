@@ -4,22 +4,16 @@ namespace ApiMiniPrj.Persistence.Services
 {
     public class EventService : IEventService
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
         private readonly IFileStorageService _fileStorageService;
         private readonly IMapper _mapper;
-        private readonly IValidator<EventCreateDto> _createValidator;
-        private readonly IValidator<EventUpdateDto> _updateValidator;
-        private readonly IValidator<EventBannerImageUploadDto> _bannerImageUploadValidator;
         
 
-        public EventService(AppDbContext context, IFileStorageService fileStorageService, IMapper mapper, IValidator<EventCreateDto> createValidator, IValidator<EventUpdateDto> updateValidator, IValidator<EventBannerImageUploadDto> bannerImageUploadValidator)
+        public EventService(IAppDbContext context, IFileStorageService fileStorageService, IMapper mapper)
         {
             _context = context;
             _fileStorageService = fileStorageService;
             _mapper = mapper;
-            _createValidator = createValidator;
-            _updateValidator = updateValidator;
-            _bannerImageUploadValidator = bannerImageUploadValidator;
         }
 
         public async Task CreateEventAsync(EventCreateDto eventCreateDto)

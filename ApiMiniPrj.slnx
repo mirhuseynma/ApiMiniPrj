@@ -11,4 +11,11 @@
   <Folder Name="/src/Presentation/">
     <Project Path="ApiMiniPrj.Api/ApiMiniPrj.Api.csproj" />
   </Folder>
+  <Folder Name="/tests/">
+    <Project Path="ApiMiniPrj.Api.Test/ApiMiniPrj.Api.Test.csproj" Id="715b132c-79c0-4314-80ea-b334710fedba" />
+    <Project Path="ApiMiniPrj.Application.Test/ApiMiniPrj.Application.Test.csproj" Id="bb73c665-91c6-439f-a541-97a3d0c30eb6" />
+    <Project Path="ApiMiniPrj.Domain.Test/ApiMiniPrj.Domain.Test.csproj" Id="7870db81-1a78-4261-acce-7f7c0cefd55a" />
+    <Project Path="ApiMiniPrj.Infrastructure.Test/ApiMiniPrj.Infrastructure.Test.csproj" Id="91ce79f1-64bb-41c0-9370-111f78ce294d" />
+    <Project Path="ApiMiniPrj.Persistence.Test/ApiMiniPrj.Persistence.Test.csproj" Id="0ae29c10-4850-4c76-81ca-294acbf4ac0c" />
+  </Folder>
 </Solution>

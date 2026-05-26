@@ -2,17 +2,13 @@ namespace ApiMiniPrj.Persistence.Services
 {
     public class TicketService : ITicketService
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
         private readonly IMapper _mapper;
-        private readonly IValidator<TicketCreateDto> _createValidator;
-        private readonly IValidator<TicketUpdateDto> _updateValidator;
 
-        public TicketService(AppDbContext context, IMapper mapper, IValidator<TicketCreateDto> createValidator, IValidator<TicketUpdateDto> updateValidator)
+        public TicketService(IAppDbContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
-            _createValidator = createValidator;
-            _updateValidator = updateValidator;
         }
 
         public async Task CreateTicketAsync(TicketCreateDto createTicketDto)

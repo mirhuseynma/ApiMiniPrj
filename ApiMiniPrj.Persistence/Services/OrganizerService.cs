@@ -3,11 +3,11 @@ namespace ApiMiniPrj.Persistence.Services
 {
     public class OrganizerService : IOrganizerService
     {
-        private readonly AppDbContext _context;
+        private readonly IAppDbContext _context;
         private readonly IFileStorageService _fileStorageService;
         private readonly IMapper _mapper;
 
-        public OrganizerService(AppDbContext context, IFileStorageService fileStorageService, IMapper mapper)
+        public OrganizerService(IAppDbContext context, IFileStorageService fileStorageService, IMapper mapper)
         {
             _context = context;
             _fileStorageService = fileStorageService;

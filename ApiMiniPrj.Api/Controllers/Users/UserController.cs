@@ -17,7 +17,6 @@ namespace ApiMiniPrj.Api.Controllers.Users
             _validator = validator;
         }
         [HttpGet]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAllUsers()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -25,8 +24,8 @@ namespace ApiMiniPrj.Api.Controllers.Users
             if (string.IsNullOrWhiteSpace(userId)) return Unauthorized("User ID not found in token");
             var currentUser = await _userManager.FindByIdAsync(userId);
             if (currentUser == null) return NotFound("User not found");
-            //if (!await _userManager.IsInRoleAsync(currentUser, "Admin"))
-            //    return Forbid("You are not allowed to view other users");
+            if (!await _userManager.IsInRoleAsync(currentUser, "Admin"))
+                return Forbid("You are not allowed to view other users");
             var users = await _userService.GetAllAsync();
             if (users == null) return NotFound("No users found");
             return Ok(users);
