@@ -1,9 +1,3 @@
-using ApiMiniPrj.Application.DTOs.Events;
-using ApiMiniPrj.Domain.Models.Events;
-using ApiMiniPrj.Domain.Models.Organizers;
-using ApiMiniPrj.Domain.Models.Tickets;
-using ApiMiniPrj.Persistence.Services;
-using Microsoft.EntityFrameworkCore;
 
 namespace ApiMiniPrj.Persistence.Test.Services;
 

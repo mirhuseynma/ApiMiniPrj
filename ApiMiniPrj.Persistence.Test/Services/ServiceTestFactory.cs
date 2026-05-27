@@ -1,11 +1,3 @@
-using ApiMiniPrj.Application.Interfaces.Common;
-using ApiMiniPrj.Application.Interfaces.JWT;
-using ApiMiniPrj.Application.Mappings;
-using ApiMiniPrj.Domain.Models.Users;
-using ApiMiniPrj.Persistence.Context;
-using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 
 namespace ApiMiniPrj.Persistence.Test.Services;
 

@@ -1,10 +1,3 @@
-using ApiMiniPrj.Api.Controllers.Organizers;
-using ApiMiniPrj.Api.Test.TestDoubles;
-using ApiMiniPrj.Application.DTOs.Organizers;
-using ApiMiniPrj.Application.Interfaces.Organizers;
-using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ApiMiniPrj.Api.Test.Controllers.Organizers;
 

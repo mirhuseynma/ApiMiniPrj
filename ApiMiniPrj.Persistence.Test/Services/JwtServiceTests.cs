@@ -1,6 +1,3 @@
-using ApiMiniPrj.Application.Common.Settings;
-using ApiMiniPrj.Persistence.Services;
-using Microsoft.Extensions.Options;
 
 namespace ApiMiniPrj.Persistence.Test.Services;
 

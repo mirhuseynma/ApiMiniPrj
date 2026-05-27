@@ -1,6 +1,3 @@
-using ApiMiniPrj.Application.DTOs.Tickets;
-using ApiMiniPrj.Application.Validators.Tickets;
-using ApiMiniPrj.Domain.Enums;
 
 namespace ApiMiniPrj.Application.Test.Validators.Tickets;
 

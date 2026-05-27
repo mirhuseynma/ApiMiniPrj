@@ -1,11 +1,3 @@
-using ApiMiniPrj.Api.Controllers.Tickets;
-using ApiMiniPrj.Api.Test.TestDoubles;
-using ApiMiniPrj.Application.DTOs.Tickets;
-using ApiMiniPrj.Application.Interfaces.Tickets;
-using ApiMiniPrj.Domain.Enums;
-using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
-
 namespace ApiMiniPrj.Api.Test.Controllers.Tickets;
 
 public class TicketControllerTests

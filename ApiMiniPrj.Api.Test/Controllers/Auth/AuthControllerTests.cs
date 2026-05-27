@@ -1,9 +1,3 @@
-using ApiMiniPrj.Api.Controllers.Auth;
-using ApiMiniPrj.Api.Test.TestDoubles;
-using ApiMiniPrj.Application.DTOs.Auth;
-using ApiMiniPrj.Application.Interfaces.Auth;
-using FluentValidation;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ApiMiniPrj.Api.Test.Controllers.Auth;
 

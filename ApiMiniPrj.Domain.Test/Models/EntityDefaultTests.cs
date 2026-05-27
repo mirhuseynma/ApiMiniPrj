@@ -1,9 +1,3 @@
-using ApiMiniPrj.Domain.Models.Common;
-using ApiMiniPrj.Domain.Models.Events;
-using ApiMiniPrj.Domain.Models;
-using ApiMiniPrj.Domain.Models.Organizers;
-using ApiMiniPrj.Domain.Models.Tickets;
-using ApiMiniPrj.Domain.Models.Users;
 
 namespace ApiMiniPrj.Domain.Test.Models;
 

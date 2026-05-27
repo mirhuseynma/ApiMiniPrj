@@ -1,5 +1,3 @@
-using ApiMiniPrj.Application.DTOs.Auth;
-using ApiMiniPrj.Application.Validators.Auth;
 
 namespace ApiMiniPrj.Application.Test.Validators.Auth;
 

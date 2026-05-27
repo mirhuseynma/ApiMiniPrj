@@ -1,0 +1,18 @@
+﻿global using ApiMiniPrj.Application.DTOs.Events;
+global using ApiMiniPrj.Domain.Models.Events;
+global using ApiMiniPrj.Domain.Models.Organizers;
+global using ApiMiniPrj.Domain.Models.Tickets;
+global using ApiMiniPrj.Persistence.Services;
+global using Microsoft.EntityFrameworkCore;
+global using ApiMiniPrj.Application.Common.Settings;
+global using Microsoft.Extensions.Options;
+global using ApiMiniPrj.Application.DTOs.Organizers;
+global using ApiMiniPrj.Application.Interfaces.JWT;
+global using ApiMiniPrj.Application.Mappings;
+global using ApiMiniPrj.Domain.Models.Users;
+global using ApiMiniPrj.Persistence.Context;
+global using AutoMapper;
+global using Microsoft.AspNetCore.Http;
+global using ApiMiniPrj.Application.DTOs.Tickets;
+global using ApiMiniPrj.Domain.Enums;
+

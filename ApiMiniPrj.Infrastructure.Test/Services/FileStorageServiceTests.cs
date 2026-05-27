@@ -1,7 +1,3 @@
-using ApiMiniPrj.Infrastructure.Services;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.FileProviders;
 
 namespace ApiMiniPrj.Infrastructure.Test.Services;
 

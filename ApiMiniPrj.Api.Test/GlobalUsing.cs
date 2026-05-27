@@ -1,0 +1,24 @@
+﻿global using ApiMiniPrj.Api.Controllers.Auth;
+global using ApiMiniPrj.Api.Test.TestDoubles;
+global using ApiMiniPrj.Application.DTOs.Auth;
+global using ApiMiniPrj.Application.Interfaces.Auth;
+global using FluentValidation;
+global using Microsoft.AspNetCore.Mvc;
+global using ApiMiniPrj.Api.Controllers.Events;
+global using ApiMiniPrj.Application.DTOs.Events;
+global using ApiMiniPrj.Application.Interfaces.Events;
+global using Microsoft.AspNetCore.Http;
+global using ApiMiniPrj.Api.Controllers.Organizers;
+global using ApiMiniPrj.Application.DTOs.Organizers;
+global using ApiMiniPrj.Application.Interfaces.Organizers;
+global using ApiMiniPrj.Api.Controllers.Tickets;
+global using ApiMiniPrj.Application.DTOs.Tickets;
+global using ApiMiniPrj.Application.Interfaces.Tickets;
+global using ApiMiniPrj.Domain.Enums;
+global using ApiMiniPrj.Api.Controllers.Users;
+global using ApiMiniPrj.Application.DTOs.Users;
+global using ApiMiniPrj.Application.Interfaces.User;
+global using System.Security.Claims;
+global using FluentValidation.Results;
+
+

@@ -1,10 +1,3 @@
-using ApiMiniPrj.Api.Controllers.Events;
-using ApiMiniPrj.Api.Test.TestDoubles;
-using ApiMiniPrj.Application.DTOs.Events;
-using ApiMiniPrj.Application.Interfaces.Events;
-using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 
 namespace ApiMiniPrj.Api.Test.Controllers.Events;
 

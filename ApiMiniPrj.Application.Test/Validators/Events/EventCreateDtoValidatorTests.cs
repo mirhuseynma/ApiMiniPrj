@@ -1,5 +1,3 @@
-using ApiMiniPrj.Application.DTOs.Events;
-using ApiMiniPrj.Application.Validators.Events;
 
 namespace ApiMiniPrj.Application.Test.Validators.Events;
 

@@ -1,12 +1,3 @@
-using ApiMiniPrj.Api.Controllers.Users;
-using ApiMiniPrj.Api.Test.TestDoubles;
-using ApiMiniPrj.Application.DTOs.Users;
-using ApiMiniPrj.Application.Interfaces.User;
-using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
-
 namespace ApiMiniPrj.Api.Test.Controllers.Users;
 
 public class UserControllerTests
