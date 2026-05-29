@@ -1,7 +1,4 @@
 ﻿
-using ApiMiniPrj.Application.Validators.Events;
-using Azure.Core;
-
 namespace ApiMiniPrj.Api.Controllers.Events
 {
     [Route("api/[controller]")]
@@ -21,6 +18,7 @@ namespace ApiMiniPrj.Api.Controllers.Events
             _bannerImageUploadValidator = bannerImageUploadValidator;
         }
 
+        [Authorize(Policy = "Permissions.Events.View")]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
@@ -29,6 +27,7 @@ namespace ApiMiniPrj.Api.Controllers.Events
         }
 
         [HttpPost]
+        [Authorize(Policy = "Permissions.Events.Create")]
         public async Task<IActionResult> Post([FromForm] EventCreateDto eventCreateDto)
         {
             var validationResult = await _createValidator.ValidateAsync(eventCreateDto);
@@ -39,6 +38,7 @@ namespace ApiMiniPrj.Api.Controllers.Events
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Policy = "Permissions.Events.View")]
         public async Task<IActionResult> Get(int id)
         {
             var eventDto = await _eventService.GetEventById(id);
@@ -46,6 +46,7 @@ namespace ApiMiniPrj.Api.Controllers.Events
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Policy = "Permissions.Events.Edit")]
         public async Task<IActionResult> Put(int id, [FromForm] EventUpdateDto eventUpdateDto)
         {
             var validationResult = await _updateValidator.ValidateAsync(eventUpdateDto);
@@ -55,6 +56,7 @@ namespace ApiMiniPrj.Api.Controllers.Events
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = "Permissions.Events.Delete")]
         public async Task<IActionResult> Delete(int id)
         {
             await _eventService.DeleteEventAsync(id);
@@ -62,6 +64,7 @@ namespace ApiMiniPrj.Api.Controllers.Events
         }
 
         [HttpPost("{Id:int}/bannerImage")]
+        [Authorize(Policy = "Permissions.Events.AddBanner")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> AddBannerImage(int Id, [FromForm] EventBannerImageUploadDto request)
         {

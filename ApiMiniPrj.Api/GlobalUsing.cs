@@ -12,7 +12,6 @@ global using ApiMiniPrj.Persistence;
 global using ApiMiniPrj.Application.DTOs.Auth;
 global using ApiMiniPrj.Application.Interfaces.Auth;
 global using ApiMiniPrj.Domain.Models.Users;
-global using AutoMapper;
 global using FluentValidation;
 global using Microsoft.AspNetCore.Identity;
 global using ApiMiniPrj.Application.DTOs.Users;
@@ -25,6 +24,13 @@ global using Microsoft.OpenApi.Models;
 global using Microsoft.EntityFrameworkCore;
 
 global using System.Text.Json.Serialization;
+
+
+
+global using ApiMiniPrj.Api.Authorization;
+global using ApiMiniPrj.Domain.Constants;
+
+
 
 
 

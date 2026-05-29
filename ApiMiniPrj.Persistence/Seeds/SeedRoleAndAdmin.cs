@@ -1,4 +1,6 @@
 ﻿
+using ApiMiniPrj.Domain.Constants;
+
 namespace ApiMiniPrj.Persistence.Seeds
 {
     public static class SeedRoleAndAdmin
@@ -8,7 +10,7 @@ namespace ApiMiniPrj.Persistence.Seeds
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
 
-            string[] roleNames = { "Admin", "User" };
+            string[] roleNames = { "Admin", "User", "Organizer" };
 
             foreach (var roleName in roleNames)
             {
@@ -43,12 +45,43 @@ namespace ApiMiniPrj.Persistence.Seeds
                     await userManager.AddToRoleAsync(adminUser, "Admin");
                 }
 
-                if(!adminUser.EmailConfirmed)
+                if (!adminUser.EmailConfirmed)
                 {
                     adminUser.EmailConfirmed = true;
                     await userManager.UpdateAsync(adminUser);
                 }
             }
+
+            await SeedRolesAndAdminAsync(roleManager, "Admin", Permissions.All());
+            await SeedRolesAndAdminAsync(roleManager, "User", [Permissions.Events.View, Permissions.Tickets.View]);
+            await SeedRolesAndAdminAsync(roleManager, "Organizer", 
+                [
+                    Permissions.Events.View,
+                    Permissions.Tickets.View,
+                    Permissions.Events.Create,
+                    Permissions.Events.Delete,
+                    Permissions.Events.Edit,
+                    Permissions.Tickets.Create,
+                    Permissions.Tickets.Delete,
+                    Permissions.Tickets.Edit,
+                    Permissions.Events.AddBanner,
+
+                    Permissions.Organizers.View
+                ]);
+
+        }
+
+        private static async Task SeedRolesAndAdminAsync(RoleManager<IdentityRole> roleManager, string roleName, IEnumerable<string> permissions)
+        { 
+            var roleExists = await roleManager.FindByNameAsync(roleName);
+            if (roleExists == null) return;
+            var existingClaims = await roleManager.GetClaimsAsync(roleExists);
+            foreach (var permission in permissions)
+            {
+                bool hasPermission = existingClaims.Any(c => c.Type == "Permission" && c.Value == permission);
+                if (!hasPermission) await roleManager.AddClaimAsync(roleExists, new Claim("Permission", permission));
+            }
+
         }
 
     }

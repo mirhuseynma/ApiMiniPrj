@@ -5,11 +5,13 @@ namespace ApiMiniPrj.Persistence.Services
     {
         private readonly UserManager<AppUser> _userManager;
         private readonly JwtSetting _jwtSetting;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public JwtService(UserManager<AppUser> userManager, IOptions<JwtSetting> jwtSetting)
+        public JwtService(UserManager<AppUser> userManager, IOptions<JwtSetting> jwtSetting, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _jwtSetting = jwtSetting.Value;
+            _roleManager = roleManager;
         }
         public async Task<string> GenerateTokenAsync(AppUser user)
         {
@@ -23,7 +25,16 @@ namespace ApiMiniPrj.Persistence.Services
                 new("FullName", user.FullName!),
             };
 
-            foreach (var role in roles) claims.Add(new Claim(ClaimTypes.Role, role));
+            foreach (var roleName in roles) 
+            {
+                claims.Add(new Claim(ClaimTypes.Role, roleName));
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role is not null)
+                {
+                    var roleClaims = await _roleManager.GetClaimsAsync(role);
+                    claims.AddRange(roleClaims);
+                }
+            }
 
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSetting.SecretKey));
 
