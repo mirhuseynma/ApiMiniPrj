@@ -42,6 +42,14 @@
             public const string Delete = "Permissions.Tickets.Delete";
         }
 
+        public static class Users
+        {
+            public const string View = "Permissions.Users.View";
+            public const string Create = "Permissions.Users.Create";
+            public const string Edit = "Permissions.Users.Edit";
+            public const string Delete = "Permissions.Users.Delete";
+        }
+
         public static IEnumerable<string> All()
         {
             yield return User.View;
@@ -64,6 +72,11 @@
             yield return Tickets.Create;
             yield return Tickets.Edit;
             yield return Tickets.Delete;
+            yield return Users.View;
+            yield return Users.Edit;
+            yield return Users.Delete;
+            yield return Users.Create;
+
         }
     }
 }

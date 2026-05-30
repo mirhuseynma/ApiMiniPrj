@@ -19,7 +19,7 @@ namespace ApiMiniPrj.Persistence.Services
         public async Task DeleteAsync(string email)
         {
             var existingUser = await _userManager.FindByEmailAsync(email);
-            if (existingUser != null)  await _userManager.DeleteAsync(existingUser); 
+            if (existingUser != null) await _userManager.DeleteAsync(existingUser);
             else throw new Exception("User not found");
         }
 
@@ -27,7 +27,14 @@ namespace ApiMiniPrj.Persistence.Services
         {
             var users = await _userManager.Users.ToListAsync();
             if (users == null || users.Count == 0) throw new Exception("No users found");
-            var userDtos = _mapper.Map<List<UserGetDto>>(users).ToList();
+            var userDtos = new List<UserGetDto>();
+            foreach (var user in users)
+            {
+                var userDto = _mapper.Map<UserGetDto>(user);
+                var roles = await _userManager.GetRolesAsync(user);
+                userDto.Roles = roles.ToList();
+                userDtos.Add(userDto);
+            }
             return userDtos;
         }
 
@@ -44,24 +51,39 @@ namespace ApiMiniPrj.Persistence.Services
 
             // Validate the update DTO
             var validationResult = await _updateValidator.ValidateAsync(userUpdateDto);
-            if (!validationResult.IsValid)
-            {
-                throw new ArgumentException("Invalid user update data");
-            }
-            if (userUpdateDto.AssignAdmin)
-            {
-                if (!await _roleManager.RoleExistsAsync("Admin"))
-                {
-                    await _roleManager.CreateAsync(new IdentityRole("Admin"));
-                }
-                if (!await _userManager.IsInRoleAsync(user, "Admin"))
-                {
-                    await _userManager.RemoveFromRolesAsync(user, await _userManager.GetRolesAsync(user));
-                    await _userManager.AddToRoleAsync(user, "Admin");
-                }
-            }
+            if (!validationResult.IsValid) throw new ArgumentException("Invalid user update data");
+
+
             user = _mapper.Map(userUpdateDto, user);
 
+            await _userManager.UpdateAsync(user);
+        }
+
+        public async Task UpdateForAdminAsync(string email, UserUpdateForAdminDto userUpdateForAdminDto)
+        {
+            var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception("User not found");
+            if (userUpdateForAdminDto.IsAdmin == false)
+            {
+                if (await _userManager.IsInRoleAsync(user, "Admin"))
+                    await _userManager.RemoveFromRoleAsync(user, "Admin");
+                var userRoles = await _userManager.GetRolesAsync(user);
+                if (userRoles.Count == 0)
+                    await _userManager.AddToRoleAsync(user, "User");
+            }
+            else await _userManager.AddToRoleAsync(user, "Admin");
+
+
+            if (userUpdateForAdminDto.IsOrganizer == false)
+            {
+                if (await _userManager.IsInRoleAsync(user, "Organizer"))
+                    await _userManager.RemoveFromRoleAsync(user, "Organizer");
+                var userRoles = await _userManager.GetRolesAsync(user);
+                if (userRoles.Count == 0)
+                    await _userManager.AddToRoleAsync(user, "User");
+            }
+            else await _userManager.AddToRoleAsync(user, "Organizer");
+
+            user = _mapper.Map(userUpdateForAdminDto, user);
             await _userManager.UpdateAsync(user);
         }
     }

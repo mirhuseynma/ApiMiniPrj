@@ -71,7 +71,8 @@ namespace ApiMiniPrj.Application.Mappings
 
             // User DTOs
             CreateMap<AppUser, UserGetDto>()
-                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => (src.FirstName + " " + src.LastName).Trim()));
+                .ForMember(dest => dest.FullName, opt => opt.MapFrom(src => (src.FirstName + " " + src.LastName).Trim()))
+                .ForMember(dest => dest.Roles, opt => opt.Ignore());
 
             CreateMap<UserUpdateDto, AppUser>()
                 .AfterMap((src, dest) =>
@@ -88,7 +89,18 @@ namespace ApiMiniPrj.Application.Mappings
                 .ForMember(dest => dest.PasswordHash, opt => opt.Ignore());  // Password is handled separately via UserManager
 
 
-
+            CreateMap<UserUpdateForAdminDto, AppUser>()
+                .AfterMap((src, dest) =>
+                {
+                    if (src.FullName != null)
+                    {
+                        var nameParts = src.FullName.Split(' ');
+                        dest.FirstName = nameParts[0];
+                        dest.LastName = nameParts.Length > 1 ? nameParts[1] : null;
+                    }
+                })
+                .ForMember(dest => dest.UserName, opt => opt.Condition(src => src.UserName != null))
+                .ForMember(dest => dest.Email, opt => opt.Condition(src => src.Email != null));
 
         }
     }

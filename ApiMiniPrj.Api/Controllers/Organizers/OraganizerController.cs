@@ -23,6 +23,7 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         {
             var organizers = await _organizerService.GetAllOrganizersAsync();
             return Ok(organizers);
+            
         }
 
         [HttpPost]

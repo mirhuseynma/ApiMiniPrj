@@ -7,5 +7,6 @@ namespace ApiMiniPrj.Application.Interfaces.User
         Task<List<UserGetDto>> GetAllAsync();
         Task<UserGetDto> GetByEmailAsync(string email);
         Task DeleteAsync(string email);
+        Task UpdateForAdminAsync(string email, UserUpdateForAdminDto userUpdateForAdminDto);
     }
 }
