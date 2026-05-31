@@ -7,9 +7,9 @@ namespace ApiMiniPrj.Persistence.Services
         private readonly IAppDbContext _context;
         private readonly IFileStorageService _fileStorageService;
         private readonly IMapper _mapper;
-        
 
-        public EventService(IAppDbContext context, IFileStorageService fileStorageService, IMapper mapper)
+
+        public EventService(IAppDbContext context, IFileStorageService fileStorageService, IMapper mapper )
         {
             _context = context;
             _fileStorageService = fileStorageService;
@@ -18,7 +18,7 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task CreateEventAsync(EventCreateDto eventCreateDto)
         {
-
+            
             var organizer = _context.Organizers.FirstOrDefault(o => o.Id == eventCreateDto.OrganizerId) ?? throw new Exception("organizer not found");
             var eventEntity = _mapper.Map<Event>(eventCreateDto);
 
@@ -72,8 +72,8 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(e => e.Organizer)
                 .Include(e => e.Tickets.Where(t => !t.IsDeleted))
                 .ToListAsync();
-            
 
+            
             return events is null ? throw new KeyNotFoundException("Events not found.") : _mapper.Map<List<GetEventDto>>(events);
         }
 

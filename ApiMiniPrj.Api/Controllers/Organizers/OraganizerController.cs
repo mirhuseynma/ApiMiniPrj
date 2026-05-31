@@ -19,6 +19,7 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         }
 
         [HttpGet]
+        [Authorize(Policy = "Permissions.Organizers.View")]
         public async Task<IActionResult> Get()
         {
             var organizers = await _organizerService.GetAllOrganizersAsync();
@@ -27,6 +28,7 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         }
 
         [HttpPost]
+        [Authorize(Policy = "Permissions.Organizers.Create")]
         public async Task<IActionResult> Post([FromForm] OrganizerCreateDto organizerCreateDto)
         {
             var validationResult = await _createValidator.ValidateAsync(organizerCreateDto);
@@ -37,6 +39,7 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Policy = "Permissions.Organizers.View")]
         public async Task<IActionResult> Get(int id)
         {
             var organizer = await _organizerService.GetOrganizerByIdAsync(id);
@@ -44,6 +47,7 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Policy = "Permissions.Organizers.Update")]
         public async Task<IActionResult> Put(int id, [FromForm] OrganizerUpdateDto organizerUpdateDto)
         {
             var validationResult = await _updateValidator.ValidateAsync(organizerUpdateDto);
@@ -53,6 +57,7 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = "Permissions.Organizers.Delete")]
         public async Task<IActionResult> Delete(int id)
         {
             await _organizerService.DeleteOrganizerAsync(id);
@@ -60,6 +65,7 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         }
 
         [HttpPost("{id:int}/logo")]
+        [Authorize(Policy = "Permissions.Organizers.AddLogo")]
         public async Task<IActionResult> UploadLogo(int id, [FromForm] OrganizerUploadLogo logo)
         {
             var validationResult = await _uploadLogoValidator.ValidateAsync(logo);

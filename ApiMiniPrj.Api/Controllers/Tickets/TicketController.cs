@@ -19,6 +19,7 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
         }
 
         [HttpGet]
+        [Authorize(Policy = "Permissions.Tickets.View")]
         public async Task<IActionResult> Get()
         {
             var tickets = await _ticketService.GetAllTicketsAsync();
@@ -26,6 +27,7 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
         }
 
         [HttpPost]
+        [Authorize(Policy = "Permissions.Tickets.Create")]
         public async Task<IActionResult> Post([FromForm] TicketCreateDto ticketCreateDto)
         {
             var validationResult = await _createValidator.ValidateAsync(ticketCreateDto);
@@ -39,6 +41,7 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
         }
 
         [HttpDelete("{id:int}")]
+        [Authorize(Policy = "Permissions.Tickets.Delete")]
         public async Task<IActionResult> Delete(int id)
         {
             await _ticketService.DeleteTicketAsync(id);
@@ -46,6 +49,7 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
         }
 
         [HttpPut("{id:int}")]
+        [Authorize(Policy = "Permissions.Tickets.Update")]
         public async Task<IActionResult> Put(int id, [FromForm] TicketUpdateDto ticketUpdateDto)
         {
             var validationResult = await _updateValidator.ValidateAsync(ticketUpdateDto);
@@ -60,6 +64,7 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
         }
 
         [HttpGet("{id:int}")]
+        [Authorize(Policy = "Permissions.Tickets.View")]
         public async Task<IActionResult> Get(int id)
         {
             var ticketDto = await _ticketService.GetTicketByIdAsync(id);

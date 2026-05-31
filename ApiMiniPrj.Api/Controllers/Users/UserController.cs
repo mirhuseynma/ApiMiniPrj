@@ -16,6 +16,7 @@
             _validator = validator;
         }
         [HttpGet]
+        [Authorize(Policy = "Permissions.Users.View")]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllAsync();
@@ -24,6 +25,7 @@
         }
 
         [HttpGet("{email}")]
+        [Authorize(Policy = "Permissions.Users.View")]
         public async Task<IActionResult> GetUserByEmail(string email)
         {
             var user = await _userService.GetByEmailAsync(email);
@@ -32,14 +34,18 @@
             return Ok(user);
         }
 
-        [HttpPut("update")]
+        [HttpPut("profile")]
         public async Task<IActionResult> UpdateUser(string email, [FromForm] UserUpdateDto userUpdateDto)
         {
+            var validationResult = await _validator.ValidateAsync(userUpdateDto);
+            if (!validationResult.IsValid)
+                return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
             await _userService.UpdateAsync(email, userUpdateDto);
             return Ok("User updated successfully");
         }
 
         [HttpDelete("email")]
+        [Authorize(Policy = "Permissions.Users.Delete")]
         public async Task<IActionResult> DeleteUser([FromQuery] string email)
         {
             if (email == null) return BadRequest("Email is required");
@@ -58,11 +64,3 @@
 }
 
 
-
-//var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-//if (string.IsNullOrWhiteSpace(userId)) return Unauthorized("User ID not found in token");
-//var currentUser = await _userManager.FindByIdAsync(userId);
-//if (currentUser == null) return NotFound("User not found");
-//if (!await _userManager.IsInRoleAsync(currentUser, "Admin") && currentUser.Email != email)
-//    return Forbid("You are not allowed to view other users");

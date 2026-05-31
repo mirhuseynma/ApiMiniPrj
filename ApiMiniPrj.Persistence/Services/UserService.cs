@@ -4,17 +4,13 @@ namespace ApiMiniPrj.Persistence.Services
     public class UserService : IUserService
     {
         private readonly UserManager<AppUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IMapper _mapper;
-        private readonly IValidator<UserUpdateDto> _updateValidator;
 
 
-        public UserService(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager, IMapper mapper, IValidator<UserUpdateDto> updateValidator)
+        public UserService(UserManager<AppUser> userManager, IMapper mapper)
         {
             _userManager = userManager;
-            _roleManager = roleManager;
             _mapper = mapper;
-            _updateValidator = updateValidator;
         }
         public async Task DeleteAsync(string email)
         {
@@ -48,12 +44,6 @@ namespace ApiMiniPrj.Persistence.Services
         public async Task UpdateAsync(string email, UserUpdateDto userUpdateDto)
         {
             var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception("User not found");
-
-            // Validate the update DTO
-            var validationResult = await _updateValidator.ValidateAsync(userUpdateDto);
-            if (!validationResult.IsValid) throw new ArgumentException("Invalid user update data");
-
-
             user = _mapper.Map(userUpdateDto, user);
 
             await _userManager.UpdateAsync(user);
