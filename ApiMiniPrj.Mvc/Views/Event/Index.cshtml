@@ -1,0 +1,37 @@
+﻿@using ApiMiniPrj.Mvc.Models.Events
+@model GetEventsVM
+@{
+    ViewData["Title"] = "Events";
+    var events = Model.Events;
+}
+
+@if (!events.Any())
+{
+    <div class="alert alert-info" role="alert">
+        No events found.
+    </div>
+}
+else
+{
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th scope="col">#</th>
+            <th scope="col">Name</th>
+            <th scope="col">Date</th>
+            <th scope="col">Location</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var eventItem in events)
+        {
+            <tr>
+                <th scope="row">@eventItem.Id</th>
+                <td>@eventItem.Title</td>
+                <td>@eventItem.Date.ToString("yyyy-MM-dd")</td>
+                <td>@eventItem.Location</td>
+            </tr>
+        }
+    </tbody>
+</table>
+}

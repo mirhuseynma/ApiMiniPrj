@@ -28,8 +28,9 @@ namespace ApiMiniPrj.Api.Controllers.Auth
             var validationResult = await _registerValidator.ValidateAsync(registerDto);
             if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
             
-            var result = await _authService.RegisterAsync(registerDto);
-            return Ok(result);
+            RegisterResponseDto responseDto = new ();
+            responseDto.Token = await _authService.RegisterAsync(registerDto);
+            return Ok(responseDto);
         }
 
 

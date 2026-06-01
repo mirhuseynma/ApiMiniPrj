@@ -10,6 +10,7 @@
   </Folder>
   <Folder Name="/src/Presentation/">
     <Project Path="ApiMiniPrj.Api/ApiMiniPrj.Api.csproj" />
+    <Project Path="ApiMiniPrj.Mvc/ApiMiniPrj.Mvc.csproj" Id="fc1b065c-6654-4eef-9901-3471749af4ad" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="ApiMiniPrj.Api.Test/ApiMiniPrj.Api.Test.csproj" Id="715b132c-79c0-4314-80ea-b334710fedba" />

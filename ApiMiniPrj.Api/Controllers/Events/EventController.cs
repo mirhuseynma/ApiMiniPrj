@@ -18,7 +18,7 @@ namespace ApiMiniPrj.Api.Controllers.Events
             _bannerImageUploadValidator = bannerImageUploadValidator;
         }
 
-        [Authorize(Policy = "Permissions.Events.View")]
+        //[Authorize(Policy = "Permissions.Events.View")]
         [HttpGet]
         public async Task<IActionResult> Get()
         {
