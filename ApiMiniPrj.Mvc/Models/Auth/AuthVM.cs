@@ -6,5 +6,6 @@ namespace ApiMiniPrj.Mvc.Models.Auth
     {
         public LoginDto Login { get; set; } = new LoginDto();
         public RegisterDto Register { get; set; } = new RegisterDto();
+        public ConfirmEmailDto ConfirmEmail { get; set; } = new ConfirmEmailDto();
     }
 }

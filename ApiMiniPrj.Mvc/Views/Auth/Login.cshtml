@@ -1,0 +1,41 @@
+@using ApiMiniPrj.Mvc.Models.Auth
+@model AuthVM
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <h2>Login</h2>
+
+            <form asp-action="Login" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Login.EmailOrUsername" class="form-label">Email or username</label>
+                    <input asp-for="Login.EmailOrUsername" class="form-control" autocomplete="username" />
+                    <span asp-validation-for="Login.EmailOrUsername" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Login.Password" class="form-label"></label>
+                    <input asp-for="Login.Password" class="form-control" type="password" autocomplete="current-password" />
+                    <span asp-validation-for="Login.Password" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3 form-check">
+                    <input asp-for="Login.RememberMe" class="form-check-input" />
+                    <label asp-for="Login.RememberMe" class="form-check-label">Remember me</label>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Login</button>
+                <a asp-action="Register" class="btn btn-link">Create account</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

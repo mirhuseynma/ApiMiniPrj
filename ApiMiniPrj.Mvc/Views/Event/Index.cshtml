@@ -5,6 +5,8 @@
     var events = Model.Events;
 }
 
+<div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
 @if (!events.Any())
 {
     <div class="alert alert-info" role="alert">

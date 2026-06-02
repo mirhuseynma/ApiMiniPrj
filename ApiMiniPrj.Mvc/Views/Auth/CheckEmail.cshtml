@@ -1,0 +1,33 @@
+@using ApiMiniPrj.Mvc.Models.Auth
+@model AuthVM
+@{
+    ViewData["Title"] = "Check Email";
+    var successMessage = TempData["SuccessMessage"] as string;
+}
+
+<div class="container mt-5">
+    @if (!string.IsNullOrWhiteSpace(successMessage))
+    {
+        <div class="alert alert-success" role="alert">
+            @successMessage
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info" role="alert">
+            Registration completed successfully. Confirm your email to activate the account.
+        </div>
+    }
+
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    @if (string.IsNullOrWhiteSpace(successMessage) && !string.IsNullOrWhiteSpace(Model?.ConfirmEmail.Email) && !string.IsNullOrWhiteSpace(Model.ConfirmEmail.Token))
+    {
+        <form asp-action="ConfirmEmail" method="post">
+            <input asp-for="ConfirmEmail.Email" type="hidden" />
+            <input asp-for="ConfirmEmail.Token" type="hidden" />
+
+            <button type="submit" class="btn btn-primary">Confirm Email</button>
+        </form>
+    }
+</div>

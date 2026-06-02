@@ -13,8 +13,22 @@ public class AuthControllerTests
         var response = await controller.Register(dto);
 
         var okResult = Assert.IsType<OkObjectResult>(response);
-        Assert.Equal("encoded-token", okResult.Value);
+        var responseDto = Assert.IsType<RegisterResponseDto>(okResult.Value);
+        Assert.Equal("encoded-token", responseDto.Token);
         Assert.Same(dto, service.RegisterDto);
+    }
+
+    [Fact]
+    public async Task Register_WhenServiceThrowsArgumentException_ShouldReturnBadRequest()
+    {
+        var service = new RecordingAuthService { RegisterException = new ArgumentException("Duplicate email.") };
+        var controller = CreateController(service);
+        var dto = new RegisterDto { FullName = "Test User", Email = "test@example.com", UserName = "test", Password = "Password123", RePassword = "Password123", AcceptTerms = true };
+
+        var response = await controller.Register(dto);
+
+        var badRequest = Assert.IsType<BadRequestObjectResult>(response);
+        Assert.Equal("Duplicate email.", badRequest.Value);
     }
 
     [Fact]
@@ -65,6 +79,7 @@ public class AuthControllerTests
     private sealed class RecordingAuthService : IAuthService
     {
         public string RegisterToken { get; set; } = "token";
+        public ArgumentException? RegisterException { get; set; }
         public ResponseDto RefreshResponse { get; set; } = new();
         public RegisterDto? RegisterDto { get; private set; }
         public bool LoginCalled { get; private set; }
@@ -82,6 +97,11 @@ public class AuthControllerTests
 
         public Task<string> RegisterAsync(RegisterDto registerDto)
         {
+            if (RegisterException is not null)
+            {
+                throw RegisterException;
+            }
+
             RegisterDto = registerDto;
             return Task.FromResult(RegisterToken);
         }

@@ -23,14 +23,21 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromForm] RegisterDto registerDto)
+        public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
             var validationResult = await _registerValidator.ValidateAsync(registerDto);
             if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
-            
-            RegisterResponseDto responseDto = new ();
-            responseDto.Token = await _authService.RegisterAsync(registerDto);
-            return Ok(responseDto);
+
+            try
+            {
+                RegisterResponseDto responseDto = new();
+                responseDto.Token = await _authService.RegisterAsync(registerDto);
+                return Ok(responseDto);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
@@ -39,9 +46,16 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         {
             var validationResult = await _loginValidator.ValidateAsync(loginDto);
             if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
-            
-            var response = await _authService.LoginAsync(loginDto);
-            return Ok(response);
+
+            try
+            {
+                var response = await _authService.LoginAsync(loginDto);
+                return Ok(response);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
@@ -50,9 +64,16 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         {
             var validationResult = await _confirmEmailValidator.ValidateAsync(confirmEmailDto);
             if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
-            
-            await _authService.ConfirmEmailAsync(confirmEmailDto);
-            return Ok("Email confirmed successfully.");
+
+            try
+            {
+                await _authService.ConfirmEmailAsync(confirmEmailDto);
+                return Ok("Email confirmed successfully.");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
