@@ -1,0 +1,56 @@
+@using ApiMiniPrj.Domain.Enums
+@using ApiMiniPrj.Mvc.Models.Tickets
+@model TicketCreateVM
+@{
+    ViewData["Title"] = "Create ticket";
+}
+
+<h1 class="h3 mb-3">Create ticket</h1>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Type" class="form-label"></label>
+        <select asp-for="Type" class="form-select" asp-items="Html.GetEnumSelectList<TicketTypeEnum>()"></select>
+        <span asp-validation-for="Type" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="EventId" class="form-label">Event</label>
+        <select asp-for="EventId" class="form-select">
+            <option value="">Select event</option>
+            @foreach (var eventItem in Model.Events)
+            {
+                <option value="@eventItem.Id">@eventItem.Title</option>
+            }
+        </select>
+        <span asp-validation-for="EventId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Quantity" class="form-label"></label>
+        <input asp-for="Quantity" class="form-control" min="1" />
+        <span asp-validation-for="Quantity" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Price" class="form-label"></label>
+        <input asp-for="Price" class="form-control" min="0.01" step="0.01" />
+        <span asp-validation-for="Price" class="text-danger"></span>
+    </div>
+
+    <div class="form-check mb-3">
+        <input asp-for="IsAvaiable" class="form-check-input" />
+        <label asp-for="IsAvaiable" class="form-check-label">Available</label>
+        <span asp-validation-for="IsAvaiable" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -47,7 +47,7 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Policy = "Permissions.Organizers.Update")]
+        [Authorize(Policy = "Permissions.Organizers.Edit")]
         public async Task<IActionResult> Put(int id, [FromForm] OrganizerUpdateDto organizerUpdateDto)
         {
             var validationResult = await _updateValidator.ValidateAsync(organizerUpdateDto);

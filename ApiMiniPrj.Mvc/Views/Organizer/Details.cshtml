@@ -1,0 +1,60 @@
+@using ApiMiniPrj.Application.DTOs.Organizers
+@model GetOrganizerDto
+@{
+    ViewData["Title"] = "Organizer details";
+}
+
+<div class="d-flex align-items-center justify-content-between mb-3">
+    <h1 class="h3 mb-0">Organizer details</h1>
+    <div>
+        <a class="btn btn-outline-secondary" asp-action="Index">Back</a>
+        <a class="btn btn-primary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+    </div>
+</div>
+
+<dl class="row">
+    <dt class="col-sm-3">Full name</dt>
+    <dd class="col-sm-9">@Model.FullName</dd>
+
+    <dt class="col-sm-3">Email</dt>
+    <dd class="col-sm-9">@Model.Email</dd>
+
+    <dt class="col-sm-3">Phone</dt>
+    <dd class="col-sm-9">@Model.PhoneNumber</dd>
+
+    <dt class="col-sm-3">Logo</dt>
+    <dd class="col-sm-9">
+        @if (!string.IsNullOrWhiteSpace(Model.LogoUrl))
+        {
+            <img src="@Model.LogoUrl" alt="@Model.FullName" class="rounded" style="max-width:160px;max-height:160px;object-fit:cover;" />
+        }
+        else
+        {
+            <span class="text-muted">No logo</span>
+        }
+    </dd>
+</dl>
+
+@if (Model.Events.Any())
+{
+    <h2 class="h5 mt-4">Events</h2>
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Date</th>
+                <th>Location</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var eventItem in Model.Events)
+            {
+                <tr>
+                    <td>@eventItem.Title</td>
+                    <td>@eventItem.Date.ToString("yyyy-MM-dd")</td>
+                    <td>@eventItem.Location</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

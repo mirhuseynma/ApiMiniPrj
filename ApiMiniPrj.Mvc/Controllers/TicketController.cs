@@ -1,15 +1,22 @@
 using ApiMiniPrj.Application.DTOs.Events;
-using ApiMiniPrj.Application.DTOs.Organizers;
-using ApiMiniPrj.Mvc.Models.Events;
+using ApiMiniPrj.Application.DTOs.Tickets;
+using ApiMiniPrj.Mvc.Models.Tickets;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ApiMiniPrj.Mvc.Controllers
 {
-    public class EventController(IHttpClientFactory httpClientFactory) : Controller
+    public class TicketController(IHttpClientFactory httpClientFactory) : Controller
     {
+        private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web)
+        {
+            Converters = { new JsonStringEnumConverter() }
+        };
+
         public async Task<IActionResult> Index()
         {
             var client = CreateAuthorizedClient();
@@ -18,11 +25,11 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var vm = new GetEventsVM();
+            var vm = new TicketIndexVM();
             HttpResponseMessage response;
             try
             {
-                response = await client.GetAsync("api/event");
+                response = await client.GetAsync("api/ticket");
             }
             catch (HttpRequestException)
             {
@@ -41,7 +48,7 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return View(vm);
             }
 
-            vm.Events = await response.Content.ReadFromJsonAsync<List<GetEventDto>>() ?? [];
+            vm.Tickets = await response.Content.ReadFromJsonAsync<List<GetTicketDto>>(JsonOptions) ?? [];
             return View(vm);
         }
 
@@ -53,7 +60,7 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var response = await client.GetAsync($"api/event/{id}");
+            var response = await client.GetAsync($"api/ticket/{id}");
             if (HandleAuthResponse(response) is IActionResult authResult)
             {
                 return authResult;
@@ -65,13 +72,13 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var eventDto = await response.Content.ReadFromJsonAsync<GetEventDto>();
-            if (eventDto is null)
+            var ticket = await response.Content.ReadFromJsonAsync<GetTicketDto>(JsonOptions);
+            if (ticket is null)
             {
                 return NotFound();
             }
 
-            return View(eventDto);
+            return View(ticket);
         }
 
         [HttpGet]
@@ -83,14 +90,16 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var vm = new CreateEventVM();
-            vm.Organizers = await GetOrganizerOptionsAsync(client);
+            var vm = new TicketCreateVM
+            {
+                Events = await GetEventOptionsAsync(client)
+            };
             return View(vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateEventVM vm)
+        public async Task<IActionResult> Create(TicketCreateVM vm)
         {
             var client = CreateAuthorizedClient();
             if (client is null)
@@ -98,8 +107,8 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            using var content = BuildEventContent(vm.Title, vm.Description, vm.Date, vm.Location, vm.OrganizerId, vm.BannerImage);
-            var response = await client.PostAsync("api/event", content);
+            using var content = BuildTicketContent(vm.Type, vm.Quantity, vm.Price, vm.IsAvaiable, vm.EventId);
+            var response = await client.PostAsync("api/ticket", content);
             if (HandleAuthResponse(response) is IActionResult authResult)
             {
                 return authResult;
@@ -108,11 +117,11 @@ namespace ApiMiniPrj.Mvc.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 AddApiErrors(await ReadApiErrorAsync(response));
-                vm.Organizers = await GetOrganizerOptionsAsync(client);
+                vm.Events = await GetEventOptionsAsync(client);
                 return View(vm);
             }
 
-            TempData["SuccessMessage"] = "Event created successfully.";
+            TempData["SuccessMessage"] = "Ticket created successfully.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -125,7 +134,7 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var response = await client.GetAsync($"api/event/{id}");
+            var response = await client.GetAsync($"api/ticket/{id}");
             if (HandleAuthResponse(response) is IActionResult authResult)
             {
                 return authResult;
@@ -137,29 +146,29 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var eventDto = await response.Content.ReadFromJsonAsync<GetEventDto>();
-            if (eventDto is null)
+            var ticket = await response.Content.ReadFromJsonAsync<GetTicketDto>(JsonOptions);
+            if (ticket is null)
             {
                 return NotFound();
             }
 
-            var vm = new UpdateEventVM
+            var vm = new TicketUpdateVM
             {
-                Id = eventDto.Id,
-                Title = eventDto.Title,
-                Description = eventDto.Description,
-                Date = eventDto.Date,
-                Location = eventDto.Location,
-                OrganizerId = eventDto.Organizer?.Id,
-                BannerImageUrl = eventDto.BannerImageUrl
+                Id = ticket.Id,
+                Type = ticket.Type,
+                Quantity = ticket.Quantity,
+                Price = ticket.Price,
+                IsAvaiable = ticket.IsAvaiable,
+                EventId = ticket.Event?.Id,
+                Events = await GetEventOptionsAsync(client)
             };
-            vm.Organizers = await GetOrganizerOptionsAsync(client);
+
             return View(vm);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UpdateEventVM vm)
+        public async Task<IActionResult> Edit(int id, TicketUpdateVM vm)
         {
             if (id != vm.Id)
             {
@@ -172,8 +181,8 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            using var content = BuildEventContent(vm.Title, vm.Description, vm.Date, vm.Location, vm.OrganizerId, vm.BannerImage);
-            var response = await client.PutAsync($"api/event/{id}", content);
+            using var content = BuildTicketContent(vm.Type, vm.Quantity, vm.Price, vm.IsAvaiable, vm.EventId);
+            var response = await client.PutAsync($"api/ticket/{id}", content);
             if (HandleAuthResponse(response) is IActionResult authResult)
             {
                 return authResult;
@@ -182,11 +191,11 @@ namespace ApiMiniPrj.Mvc.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 AddApiErrors(await ReadApiErrorAsync(response));
-                vm.Organizers = await GetOrganizerOptionsAsync(client);
+                vm.Events = await GetEventOptionsAsync(client);
                 return View(vm);
             }
 
-            TempData["SuccessMessage"] = "Event updated successfully.";
+            TempData["SuccessMessage"] = "Ticket updated successfully.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -200,7 +209,7 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var response = await client.DeleteAsync($"api/event/{id}");
+            var response = await client.DeleteAsync($"api/ticket/{id}");
             if (HandleAuthResponse(response) is IActionResult authResult)
             {
                 return authResult;
@@ -212,7 +221,7 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            TempData["SuccessMessage"] = "Event deleted successfully.";
+            TempData["SuccessMessage"] = "Ticket deleted successfully.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -244,48 +253,39 @@ namespace ApiMiniPrj.Mvc.Controllers
             return null;
         }
 
-        private static MultipartFormDataContent BuildEventContent(
-            string? title,
-            string? description,
-            DateTime? date,
-            string? location,
-            int? organizerId,
-            IFormFile? bannerImage)
+        private static MultipartFormDataContent BuildTicketContent(
+            object? type,
+            object? quantity,
+            object? price,
+            object? isAvaiable,
+            object? eventId)
         {
-            var content = new MultipartFormDataContent
+            return new MultipartFormDataContent
             {
-                { new StringContent(title ?? string.Empty), nameof(EventCreateDto.Title) },
-                { new StringContent(description ?? string.Empty), nameof(EventCreateDto.Description) },
-                { new StringContent(date?.ToString("O") ?? string.Empty), nameof(EventCreateDto.Date) },
-                { new StringContent(location ?? string.Empty), nameof(EventCreateDto.Location) },
-                { new StringContent(organizerId?.ToString() ?? string.Empty), nameof(EventCreateDto.OrganizerId) }
+                { new StringContent(type?.ToString() ?? string.Empty), nameof(TicketCreateDto.Type) },
+                { new StringContent(quantity?.ToString() ?? string.Empty), nameof(TicketCreateDto.Quantity) },
+                { new StringContent(Convert.ToString(price, CultureInfo.InvariantCulture) ?? string.Empty), nameof(TicketCreateDto.Price) },
+                { new StringContent(isAvaiable?.ToString() ?? string.Empty), nameof(TicketCreateDto.IsAvaiable) },
+                { new StringContent(eventId?.ToString() ?? string.Empty), nameof(TicketCreateDto.EventId) }
             };
-
-            if (bannerImage is not null && bannerImage.Length > 0)
-            {
-                var fileContent = new StreamContent(bannerImage.OpenReadStream());
-                fileContent.Headers.ContentType = new MediaTypeHeaderValue(bannerImage.ContentType);
-                content.Add(fileContent, nameof(EventCreateDto.BannerImage), bannerImage.FileName);
-            }
-
-            return content;
         }
 
-        private static async Task<List<EventOrganizerOptionVM>> GetOrganizerOptionsAsync(HttpClient client)
+        private static async Task<List<TicketEventOptionVM>> GetEventOptionsAsync(HttpClient client)
         {
-            var response = await client.GetAsync("api/oraganizer");
+            var response = await client.GetAsync("api/event");
             if (!response.IsSuccessStatusCode)
             {
                 return [];
             }
 
-            var organizers = await response.Content.ReadFromJsonAsync<List<GetOrganizerDto>>() ?? [];
-            return [.. organizers
-                .Select(organizer => new EventOrganizerOptionVM
+            var events = await response.Content.ReadFromJsonAsync<List<GetEventDto>>() ?? [];
+            return events
+                .Select(eventItem => new TicketEventOptionVM
                 {
-                    Id = organizer.Id,
-                    FullName = organizer.FullName
-                })];
+                    Id = eventItem.Id,
+                    Title = eventItem.Title
+                })
+                .ToList();
         }
 
         private void AddApiErrors(string errorMessage)

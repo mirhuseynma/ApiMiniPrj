@@ -1,6 +1,5 @@
-using ApiMiniPrj.Application.DTOs.Events;
 using ApiMiniPrj.Application.DTOs.Organizers;
-using ApiMiniPrj.Mvc.Models.Events;
+using ApiMiniPrj.Mvc.Models.Organizers;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Net.Http.Headers;
@@ -8,7 +7,7 @@ using System.Text.Json;
 
 namespace ApiMiniPrj.Mvc.Controllers
 {
-    public class EventController(IHttpClientFactory httpClientFactory) : Controller
+    public class OrganizerController(IHttpClientFactory httpClientFactory) : Controller
     {
         public async Task<IActionResult> Index()
         {
@@ -18,11 +17,11 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var vm = new GetEventsVM();
+            var vm = new OrganizerIndexVM();
             HttpResponseMessage response;
             try
             {
-                response = await client.GetAsync("api/event");
+                response = await client.GetAsync("api/oraganizer");
             }
             catch (HttpRequestException)
             {
@@ -41,7 +40,7 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return View(vm);
             }
 
-            vm.Events = await response.Content.ReadFromJsonAsync<List<GetEventDto>>() ?? [];
+            vm.Organizers = await response.Content.ReadFromJsonAsync<List<GetOrganizerDto>>() ?? [];
             return View(vm);
         }
 
@@ -53,7 +52,7 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var response = await client.GetAsync($"api/event/{id}");
+            var response = await client.GetAsync($"api/oraganizer/{id}");
             if (HandleAuthResponse(response) is IActionResult authResult)
             {
                 return authResult;
@@ -65,32 +64,24 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var eventDto = await response.Content.ReadFromJsonAsync<GetEventDto>();
-            if (eventDto is null)
+            var organizer = await response.Content.ReadFromJsonAsync<GetOrganizerDto>();
+            if (organizer is null)
             {
                 return NotFound();
             }
 
-            return View(eventDto);
+            return View(organizer);
         }
 
         [HttpGet]
-        public async Task<IActionResult> Create()
+        public IActionResult Create()
         {
-            var client = CreateAuthorizedClient();
-            if (client is null)
-            {
-                return RedirectToAction("Login", "Auth");
-            }
-
-            var vm = new CreateEventVM();
-            vm.Organizers = await GetOrganizerOptionsAsync(client);
-            return View(vm);
+            return View(new OrganizerCreateVM());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(CreateEventVM vm)
+        public async Task<IActionResult> Create(OrganizerCreateVM vm)
         {
             var client = CreateAuthorizedClient();
             if (client is null)
@@ -98,8 +89,8 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            using var content = BuildEventContent(vm.Title, vm.Description, vm.Date, vm.Location, vm.OrganizerId, vm.BannerImage);
-            var response = await client.PostAsync("api/event", content);
+            using var content = BuildOrganizerContent(vm.FullName, vm.Email, vm.PhoneNumber, vm.Logo);
+            var response = await client.PostAsync("api/oraganizer", content);
             if (HandleAuthResponse(response) is IActionResult authResult)
             {
                 return authResult;
@@ -108,11 +99,10 @@ namespace ApiMiniPrj.Mvc.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 AddApiErrors(await ReadApiErrorAsync(response));
-                vm.Organizers = await GetOrganizerOptionsAsync(client);
                 return View(vm);
             }
 
-            TempData["SuccessMessage"] = "Event created successfully.";
+            TempData["SuccessMessage"] = "Organizer created successfully.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -125,7 +115,7 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var response = await client.GetAsync($"api/event/{id}");
+            var response = await client.GetAsync($"api/oraganizer/{id}");
             if (HandleAuthResponse(response) is IActionResult authResult)
             {
                 return authResult;
@@ -137,29 +127,25 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            var eventDto = await response.Content.ReadFromJsonAsync<GetEventDto>();
-            if (eventDto is null)
+            var organizer = await response.Content.ReadFromJsonAsync<GetOrganizerDto>();
+            if (organizer is null)
             {
                 return NotFound();
             }
 
-            var vm = new UpdateEventVM
+            return View(new OrganizerUpdateVM
             {
-                Id = eventDto.Id,
-                Title = eventDto.Title,
-                Description = eventDto.Description,
-                Date = eventDto.Date,
-                Location = eventDto.Location,
-                OrganizerId = eventDto.Organizer?.Id,
-                BannerImageUrl = eventDto.BannerImageUrl
-            };
-            vm.Organizers = await GetOrganizerOptionsAsync(client);
-            return View(vm);
+                Id = organizer.Id,
+                FullName = organizer.FullName,
+                Email = organizer.Email,
+                PhoneNumber = organizer.PhoneNumber,
+                LogoUrl = organizer.LogoUrl
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, UpdateEventVM vm)
+        public async Task<IActionResult> Edit(int id, OrganizerUpdateVM vm)
         {
             if (id != vm.Id)
             {
@@ -172,8 +158,8 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            using var content = BuildEventContent(vm.Title, vm.Description, vm.Date, vm.Location, vm.OrganizerId, vm.BannerImage);
-            var response = await client.PutAsync($"api/event/{id}", content);
+            using var content = BuildOrganizerContent(vm.FullName, vm.Email, vm.PhoneNumber, vm.Logo);
+            var response = await client.PutAsync($"api/oraganizer/{id}", content);
             if (HandleAuthResponse(response) is IActionResult authResult)
             {
                 return authResult;
@@ -182,11 +168,10 @@ namespace ApiMiniPrj.Mvc.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 AddApiErrors(await ReadApiErrorAsync(response));
-                vm.Organizers = await GetOrganizerOptionsAsync(client);
                 return View(vm);
             }
 
-            TempData["SuccessMessage"] = "Event updated successfully.";
+            TempData["SuccessMessage"] = "Organizer updated successfully.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -200,7 +185,7 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction("Login", "Auth");
             }
 
-            var response = await client.DeleteAsync($"api/event/{id}");
+            var response = await client.DeleteAsync($"api/oraganizer/{id}");
             if (HandleAuthResponse(response) is IActionResult authResult)
             {
                 return authResult;
@@ -212,7 +197,7 @@ namespace ApiMiniPrj.Mvc.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            TempData["SuccessMessage"] = "Event deleted successfully.";
+            TempData["SuccessMessage"] = "Organizer deleted successfully.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -244,48 +229,23 @@ namespace ApiMiniPrj.Mvc.Controllers
             return null;
         }
 
-        private static MultipartFormDataContent BuildEventContent(
-            string? title,
-            string? description,
-            DateTime? date,
-            string? location,
-            int? organizerId,
-            IFormFile? bannerImage)
+        private static MultipartFormDataContent BuildOrganizerContent(string? fullName, string? email, string? phoneNumber, IFormFile? logo)
         {
             var content = new MultipartFormDataContent
             {
-                { new StringContent(title ?? string.Empty), nameof(EventCreateDto.Title) },
-                { new StringContent(description ?? string.Empty), nameof(EventCreateDto.Description) },
-                { new StringContent(date?.ToString("O") ?? string.Empty), nameof(EventCreateDto.Date) },
-                { new StringContent(location ?? string.Empty), nameof(EventCreateDto.Location) },
-                { new StringContent(organizerId?.ToString() ?? string.Empty), nameof(EventCreateDto.OrganizerId) }
+                { new StringContent(fullName ?? string.Empty), nameof(OrganizerCreateDto.FullName) },
+                { new StringContent(email ?? string.Empty), nameof(OrganizerCreateDto.Email) },
+                { new StringContent(phoneNumber ?? string.Empty), nameof(OrganizerCreateDto.PhoneNumber) }
             };
 
-            if (bannerImage is not null && bannerImage.Length > 0)
+            if (logo is not null && logo.Length > 0)
             {
-                var fileContent = new StreamContent(bannerImage.OpenReadStream());
-                fileContent.Headers.ContentType = new MediaTypeHeaderValue(bannerImage.ContentType);
-                content.Add(fileContent, nameof(EventCreateDto.BannerImage), bannerImage.FileName);
+                var fileContent = new StreamContent(logo.OpenReadStream());
+                fileContent.Headers.ContentType = new MediaTypeHeaderValue(logo.ContentType);
+                content.Add(fileContent, nameof(OrganizerCreateDto.Logo), logo.FileName);
             }
 
             return content;
-        }
-
-        private static async Task<List<EventOrganizerOptionVM>> GetOrganizerOptionsAsync(HttpClient client)
-        {
-            var response = await client.GetAsync("api/oraganizer");
-            if (!response.IsSuccessStatusCode)
-            {
-                return [];
-            }
-
-            var organizers = await response.Content.ReadFromJsonAsync<List<GetOrganizerDto>>() ?? [];
-            return [.. organizers
-                .Select(organizer => new EventOrganizerOptionVM
-                {
-                    Id = organizer.Id,
-                    FullName = organizer.FullName
-                })];
         }
 
         private void AddApiErrors(string errorMessage)

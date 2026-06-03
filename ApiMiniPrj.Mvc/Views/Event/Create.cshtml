@@ -1,0 +1,61 @@
+@using ApiMiniPrj.Mvc.Models.Events
+@model CreateEventVM
+@{
+    ViewData["Title"] = "Create event";
+}
+
+<h1 class="h3 mb-3">Create event</h1>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" maxlength="100" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description" class="form-control" rows="4" maxlength="500"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Date" class="form-label"></label>
+        <input asp-for="Date" class="form-control" type="datetime-local" />
+        <span asp-validation-for="Date" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Location" class="form-label"></label>
+        <input asp-for="Location" class="form-control" maxlength="200" />
+        <span asp-validation-for="Location" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="OrganizerId" class="form-label">Organizer</label>
+        <select asp-for="OrganizerId" class="form-select">
+            <option value="">Select organizer</option>
+            @foreach (var organizer in Model.Organizers)
+            {
+                <option value="@organizer.Id">@organizer.FullName</option>
+            }
+        </select>
+        <span asp-validation-for="OrganizerId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="BannerImage" class="form-label"></label>
+        <input asp-for="BannerImage" class="form-control" type="file" accept="image/*" />
+        <span asp-validation-for="BannerImage" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Create</button>
+    <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

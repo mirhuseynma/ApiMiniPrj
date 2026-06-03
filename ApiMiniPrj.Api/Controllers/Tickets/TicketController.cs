@@ -36,7 +36,16 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
             {
                 return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
             }
-            await _ticketService.CreateTicketAsync(ticketCreateDto);
+
+            try
+            {
+                await _ticketService.CreateTicketAsync(ticketCreateDto);
+            }
+            catch (Exception ex) when (ex.Message == "Event not found.")
+            {
+                return BadRequest(ex.Message);
+            }
+
             return Ok();
         }
 
@@ -44,12 +53,19 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
         [Authorize(Policy = "Permissions.Tickets.Delete")]
         public async Task<IActionResult> Delete(int id)
         {
-            await _ticketService.DeleteTicketAsync(id);
-            return Ok();
+            try
+            {
+                await _ticketService.DeleteTicketAsync(id);
+                return Ok();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpPut("{id:int}")]
-        [Authorize(Policy = "Permissions.Tickets.Update")]
+        [Authorize(Policy = "Permissions.Tickets.Edit")]
         public async Task<IActionResult> Put(int id, [FromForm] TicketUpdateDto ticketUpdateDto)
         {
             var validationResult = await _updateValidator.ValidateAsync(ticketUpdateDto);
@@ -59,8 +75,15 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
                 return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
             }
 
-            await _ticketService.UpdateTicketAsync(id, ticketUpdateDto);
-            return Ok();
+            try
+            {
+                await _ticketService.UpdateTicketAsync(id, ticketUpdateDto);
+                return Ok();
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         [HttpGet("{id:int}")]
@@ -68,6 +91,11 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
         public async Task<IActionResult> Get(int id)
         {
             var ticketDto = await _ticketService.GetTicketByIdAsync(id);
+            if (ticketDto is null)
+            {
+                return NotFound("Ticket not found.");
+            }
+
             return Ok(ticketDto);
         }
     }
