@@ -33,7 +33,7 @@ public class TicketServiceTests
         await using var context = ServiceTestFactory.CreateContext();
         var service = new TicketService(context, ServiceTestFactory.CreateMapper());
 
-        var exception = await Assert.ThrowsAsync<Exception>(() => service.CreateTicketAsync(new TicketCreateDto { EventId = 99 }));
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() => service.CreateTicketAsync(new TicketCreateDto { EventId = 99 }));
 
         Assert.Equal("Event not found.", exception.Message);
     }
@@ -90,13 +90,13 @@ public class TicketServiceTests
     }
 
     [Fact]
-    public async Task GetTicketByIdAsync_WhenTicketIsMissing_ShouldReturnMappedNullResult()
+    public async Task GetTicketByIdAsync_WhenTicketIsMissing_ShouldThrowNotFoundException()
     {
         await using var context = ServiceTestFactory.CreateContext();
         var service = new TicketService(context, ServiceTestFactory.CreateMapper());
 
-        var result = await service.GetTicketByIdAsync(99);
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() => service.GetTicketByIdAsync(99));
 
-        Assert.Null(result);
+        Assert.Equal("Ticket not found.", exception.Message);
     }
 }

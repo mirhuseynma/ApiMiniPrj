@@ -14,7 +14,7 @@ namespace ApiMiniPrj.Persistence.Services
         public async Task CreateTicketAsync(TicketCreateDto createTicketDto)
         {
 
-            var eventExists = await _context.Events.FirstOrDefaultAsync(e => e.Id == createTicketDto.EventId) ?? throw new Exception("Event not found.");
+            var eventExists = await _context.Events.FirstOrDefaultAsync(e => e.Id == createTicketDto.EventId && !e.IsDeleted) ?? throw new NotFoundException("Event not found.");
             var ticket = _mapper.Map<Ticket>(createTicketDto);
 
             await _context.Tickets.AddAsync(ticket);
@@ -44,7 +44,7 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(t => t.Event)
                 .FirstOrDefaultAsync(t => t.Id == ticketId && !t.IsDeleted);
 
-            return  _mapper.Map<GetTicketDto>(ticket);
+            return ticket is null ? throw new NotFoundException("Ticket not found.") : _mapper.Map<GetTicketDto>(ticket);
         }
 
         public async Task<IEnumerable<GetTicketDto>> GetAllTicketsAsync()
@@ -54,14 +54,14 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(t => t.Event)
                 .ToListAsync();
 
-            return tickets is null ? throw new KeyNotFoundException("No tickets found.") : _mapper.Map<IEnumerable<GetTicketDto>>(tickets);
+            return _mapper.Map<IEnumerable<GetTicketDto>>(tickets);
         }
 
         private async Task<Ticket> GetTicketEntityAsync(int ticketId)
         {
             var ticket = await _context.Tickets.FirstOrDefaultAsync(t => t.Id == ticketId && !t.IsDeleted);
 
-            return ticket is null ? throw new KeyNotFoundException("Ticket not found.") : ticket;
+            return ticket is null ? throw new NotFoundException("Ticket not found.") : ticket;
         }
     }
 }

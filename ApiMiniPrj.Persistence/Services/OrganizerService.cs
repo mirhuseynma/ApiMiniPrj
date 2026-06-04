@@ -57,7 +57,7 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(o => o.Events.Where(e => !e.IsDeleted))
                 .FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted);
 
-            return organizer is null ? throw new KeyNotFoundException("Organizer not found.") : _mapper.Map<GetOrganizerDto>(organizer);
+            return organizer is null ? throw new NotFoundException("Organizer not found.") : _mapper.Map<GetOrganizerDto>(organizer);
         }
 
         public async Task<IEnumerable<GetOrganizerDto>> GetAllOrganizersAsync()
@@ -67,17 +67,17 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(o => o.Events.Where(e => !e.IsDeleted))
                 .ToListAsync();
 
-            return organizers is null ? throw new KeyNotFoundException("No organizers found.") : _mapper.Map<IEnumerable<GetOrganizerDto>>(organizers);
+            return _mapper.Map<IEnumerable<GetOrganizerDto>>(organizers);
         }
 
         public async Task OrganizerUploadLogo(int id, IFormFile logo)
         {
             if (logo.Length == 0)
             {
-                throw new ArgumentException("Logo is required.", nameof(logo));
+                throw new BadRequestException("Logo is required.");
             }
 
-            var organizer = await _context.Organizers.FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted) ?? throw new KeyNotFoundException("Organizer not found.");
+            var organizer = await _context.Organizers.FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted) ?? throw new NotFoundException("Organizer not found.");
             if (organizer.LogoUrl is not null)
             {
                 _fileStorageService.DeleteFile(organizer.LogoUrl, "organizers");
@@ -93,7 +93,7 @@ namespace ApiMiniPrj.Persistence.Services
         {
             var organizer = await _context.Organizers.FirstOrDefaultAsync(o => o.Id == id && !o.IsDeleted);
 
-            return organizer is null ? throw new KeyNotFoundException("Organizer not found.") : organizer;
+            return organizer is null ? throw new NotFoundException("Organizer not found.") : organizer;
         }
 
 

@@ -1,9 +1,9 @@
 using ApiMiniPrj.Application.DTOs.Organizers;
+using ApiMiniPrj.Mvc.Common;
 using ApiMiniPrj.Mvc.Models.Organizers;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Text.Json;
 
 namespace ApiMiniPrj.Mvc.Controllers
 {
@@ -258,20 +258,7 @@ namespace ApiMiniPrj.Mvc.Controllers
 
         private static async Task<string> ReadApiErrorAsync(HttpResponseMessage response)
         {
-            var content = await response.Content.ReadAsStringAsync();
-            if (string.IsNullOrWhiteSpace(content))
-            {
-                return $"Request failed ({(int)response.StatusCode} {response.ReasonPhrase}).";
-            }
-
-            try
-            {
-                return JsonSerializer.Deserialize<string>(content) ?? content;
-            }
-            catch (JsonException)
-            {
-                return content;
-            }
+            return await ApiErrorReader.ReadAsync(response);
         }
     }
 }

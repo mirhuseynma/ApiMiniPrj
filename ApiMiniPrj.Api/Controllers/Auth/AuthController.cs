@@ -26,36 +26,23 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
             var validationResult = await _registerValidator.ValidateAsync(registerDto);
-            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            if (!validationResult.IsValid) return ApiResponseFactory.ValidationError(validationResult, HttpContext);
 
-            try
-            {
-                RegisterResponseDto responseDto = new();
-                responseDto.Token = await _authService.RegisterAsync(registerDto);
-                return Ok(responseDto);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            RegisterResponseDto responseDto = new();
+            responseDto.Token = await _authService.RegisterAsync(registerDto);
+            return Ok(responseDto);
         }
 
 
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromForm] LoginDto loginDto)
         {
+            throw new NotImplementedException("salam");
             var validationResult = await _loginValidator.ValidateAsync(loginDto);
-            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            if (!validationResult.IsValid) return ApiResponseFactory.ValidationError(validationResult, HttpContext);
 
-            try
-            {
-                var response = await _authService.LoginAsync(loginDto);
-                return Ok(response);
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var response = await _authService.LoginAsync(loginDto);
+            return Ok(response);
         }
 
 
@@ -63,17 +50,10 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         public async Task<IActionResult> ConfirmEmail([FromForm] ConfirmEmailDto confirmEmailDto)
         {
             var validationResult = await _confirmEmailValidator.ValidateAsync(confirmEmailDto);
-            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            if (!validationResult.IsValid) return ApiResponseFactory.ValidationError(validationResult, HttpContext);
 
-            try
-            {
-                await _authService.ConfirmEmailAsync(confirmEmailDto);
-                return Ok("Email confirmed successfully.");
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            await _authService.ConfirmEmailAsync(confirmEmailDto);
+            return Ok("Email confirmed successfully.");
         }
 
 
@@ -81,7 +61,7 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         public async Task<IActionResult> ForgotPassword([FromForm] ForgotPasswordDto forgotPasswordDto)
         {
             var validationResult = await _forgotPasswordValidator.ValidateAsync(forgotPasswordDto);
-            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            if (!validationResult.IsValid) return ApiResponseFactory.ValidationError(validationResult, HttpContext);
             
 
             var result = await _authService.ForgotPasswordAsync(forgotPasswordDto);
@@ -95,7 +75,7 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         public async Task<IActionResult> ResetPassword([FromForm] ResetPasswordDto resetPasswordDto)
         {
             var validationResult = await _resetPasswordValidator.ValidateAsync(resetPasswordDto);
-            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            if (!validationResult.IsValid) return ApiResponseFactory.ValidationError(validationResult, HttpContext);
             
 
             await _authService.ResetPasswordAsync(resetPasswordDto);

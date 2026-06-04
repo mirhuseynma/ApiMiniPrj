@@ -25,7 +25,9 @@ public class EventControllerTests
         var response = await controller.Post(new EventCreateDto());
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(response);
-        Assert.Equal("Event title is required.", badRequest.Value);
+        var error = Assert.IsType<ApiErrorResponse>(badRequest.Value);
+        Assert.Equal(400, error.StatusCode);
+        Assert.Equal("Validation failed.", error.Message);
         Assert.False(service.CreateCalled);
     }
 

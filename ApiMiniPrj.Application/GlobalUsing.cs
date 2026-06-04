@@ -13,6 +13,7 @@ global using ApiMiniPrj.Application.DTOs.Users;
 global using ApiMiniPrj.Domain.Models.Users;
 global using ApiMiniPrj.Domain.Models;
 global using Microsoft.EntityFrameworkCore;
+global using ApiMiniPrj.Application.Common.Exceptions;
 
 
 

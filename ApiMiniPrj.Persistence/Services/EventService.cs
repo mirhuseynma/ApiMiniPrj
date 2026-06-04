@@ -19,7 +19,7 @@ namespace ApiMiniPrj.Persistence.Services
         public async Task CreateEventAsync(EventCreateDto eventCreateDto)
         {
             
-            var organizer = _context.Organizers.FirstOrDefault(o => o.Id == eventCreateDto.OrganizerId) ?? throw new Exception("organizer not found");
+            var organizer = _context.Organizers.FirstOrDefault(o => o.Id == eventCreateDto.OrganizerId) ?? throw new NotFoundException("Organizer not found.");
             var eventEntity = _mapper.Map<Event>(eventCreateDto);
 
             if (eventCreateDto.BannerImage is not null)
@@ -62,7 +62,7 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(e => e.Tickets.Where(t => !t.IsDeleted))
                 .FirstOrDefaultAsync(e => e.Id == eventId && !e.IsDeleted);
 
-            return eventEntity is null ? throw new KeyNotFoundException("Event not found.") : _mapper.Map<GetEventDto>(eventEntity);
+            return eventEntity is null ? throw new NotFoundException("Event not found.") : _mapper.Map<GetEventDto>(eventEntity);
         }
 
         public async Task<List<GetEventDto>> GetAllEventsAsync()
@@ -74,7 +74,7 @@ namespace ApiMiniPrj.Persistence.Services
                 .ToListAsync();
 
             
-            return events is null ? throw new KeyNotFoundException("Events not found.") : _mapper.Map<List<GetEventDto>>(events);
+            return _mapper.Map<List<GetEventDto>>(events);
         }
 
         public async Task<GetEventDto> GetEventByTitle(string title)
@@ -84,13 +84,13 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(e => e.Tickets.Where(t => !t.IsDeleted))
                 .FirstOrDefaultAsync(e => e.Title == title && !e.IsDeleted);
 
-            return eventEntity is null ? throw new KeyNotFoundException("Event not found.") : _mapper.Map<GetEventDto>(eventEntity);
+            return eventEntity is null ? throw new NotFoundException("Event not found.") : _mapper.Map<GetEventDto>(eventEntity);
         }
 
         public async Task AddBannerImageAsync(int eventId, IFormFile bannerImage)
         {
             
-            var eventEntity = await _context.Events.FirstOrDefaultAsync(e => e.Id == eventId && !e.IsDeleted) ?? throw new KeyNotFoundException("Event not found.");
+            var eventEntity = await _context.Events.FirstOrDefaultAsync(e => e.Id == eventId && !e.IsDeleted) ?? throw new NotFoundException("Event not found.");
             if (eventEntity.BannerImageUrl is not null)
             {
                 _fileStorageService.DeleteFile(eventEntity.BannerImageUrl, "events");
@@ -109,7 +109,7 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(e => e.Tickets.Where(t => !t.IsDeleted))
                 .FirstOrDefaultAsync(e => e.Id == eventId && !e.IsDeleted);
 
-            return eventEntity is null ? throw new KeyNotFoundException("Event not found.") : eventEntity;
+            return eventEntity is null ? throw new NotFoundException("Event not found.") : eventEntity;
         }
     }
 }

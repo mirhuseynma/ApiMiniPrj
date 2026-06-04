@@ -95,8 +95,8 @@ public class OrganizerServiceTests
         var service = new OrganizerService(context, new ServiceTestFactory.FakeFileStorageService(), ServiceTestFactory.CreateMapper());
         var emptyFile = ServiceTestFactory.CreateFormFile("empty.png", "");
 
-        var exception = await Assert.ThrowsAsync<ArgumentException>(() => service.OrganizerUploadLogo(1, emptyFile));
+        var exception = await Assert.ThrowsAsync<BadRequestException>(() => service.OrganizerUploadLogo(1, emptyFile));
 
-        Assert.Contains("Logo is required.", exception.Message);
+        Assert.Equal("Logo is required.", exception.Message);
     }
 }

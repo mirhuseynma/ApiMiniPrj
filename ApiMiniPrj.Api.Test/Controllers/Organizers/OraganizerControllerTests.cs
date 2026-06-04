@@ -25,7 +25,9 @@ public class OraganizerControllerTests
         var response = await controller.Post(new OrganizerCreateDto());
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(response);
-        Assert.Equal("Organizer name is required.", badRequest.Value);
+        var error = Assert.IsType<ApiErrorResponse>(badRequest.Value);
+        Assert.Equal(400, error.StatusCode);
+        Assert.Equal("Validation failed.", error.Message);
         Assert.False(service.CreateCalled);
     }
 
@@ -38,7 +40,9 @@ public class OraganizerControllerTests
         var response = await controller.UploadLogo(1, new OrganizerUploadLogo());
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(response);
-        Assert.Equal("Logo file is required.", badRequest.Value);
+        var error = Assert.IsType<ApiErrorResponse>(badRequest.Value);
+        Assert.Equal(400, error.StatusCode);
+        Assert.Equal("Logo file is required.", error.Message);
         Assert.False(service.UploadLogoCalled);
     }
 

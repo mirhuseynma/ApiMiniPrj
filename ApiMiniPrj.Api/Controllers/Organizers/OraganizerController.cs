@@ -32,7 +32,7 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         public async Task<IActionResult> Post([FromForm] OrganizerCreateDto organizerCreateDto)
         {
             var validationResult = await _createValidator.ValidateAsync(organizerCreateDto);
-            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            if (!validationResult.IsValid) return ApiResponseFactory.ValidationError(validationResult, HttpContext);
             
             await _organizerService.CreateOrganizerAsync(organizerCreateDto);
             return Ok();
@@ -51,7 +51,7 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         public async Task<IActionResult> Put(int id, [FromForm] OrganizerUpdateDto organizerUpdateDto)
         {
             var validationResult = await _updateValidator.ValidateAsync(organizerUpdateDto);
-            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            if (!validationResult.IsValid) return ApiResponseFactory.ValidationError(validationResult, HttpContext);
             await _organizerService.UpdateOrganizerAsync(id, organizerUpdateDto);
             return Ok();
         }
@@ -69,10 +69,10 @@ namespace ApiMiniPrj.Api.Controllers.Organizers
         public async Task<IActionResult> UploadLogo(int id, [FromForm] OrganizerUploadLogo logo)
         {
             var validationResult = await _uploadLogoValidator.ValidateAsync(logo);
-            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            if (!validationResult.IsValid) return ApiResponseFactory.ValidationError(validationResult, HttpContext);
             if (logo.Logo is null || logo.Logo.Length == 0)
             {
-                return BadRequest("Logo file is required.");
+                return ApiResponseFactory.BadRequest("Logo file is required.", HttpContext);
             }
             await _organizerService.OrganizerUploadLogo(id, logo.Logo);
             return Ok();

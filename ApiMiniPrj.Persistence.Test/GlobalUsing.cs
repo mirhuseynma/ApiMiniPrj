@@ -15,4 +15,4 @@ global using AutoMapper;
 global using Microsoft.AspNetCore.Http;
 global using ApiMiniPrj.Application.DTOs.Tickets;
 global using ApiMiniPrj.Domain.Enums;
-
+global using ApiMiniPrj.Application.Common.Exceptions;

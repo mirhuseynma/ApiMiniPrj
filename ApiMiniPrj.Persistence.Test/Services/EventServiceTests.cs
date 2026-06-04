@@ -35,9 +35,9 @@ public class EventServiceTests
         await using var context = ServiceTestFactory.CreateContext();
         var service = new EventService(context, new ServiceTestFactory.FakeFileStorageService(), ServiceTestFactory.CreateMapper());
 
-        var exception = await Assert.ThrowsAsync<Exception>(() => service.CreateEventAsync(new EventCreateDto { OrganizerId = 9 }));
+        var exception = await Assert.ThrowsAsync<NotFoundException>(() => service.CreateEventAsync(new EventCreateDto { OrganizerId = 9 }));
 
-        Assert.Equal("organizer not found", exception.Message);
+        Assert.Equal("Organizer not found.", exception.Message);
     }
 
     [Fact]

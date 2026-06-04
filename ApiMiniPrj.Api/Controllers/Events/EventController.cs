@@ -31,7 +31,7 @@ namespace ApiMiniPrj.Api.Controllers.Events
         public async Task<IActionResult> Post([FromForm] EventCreateDto eventCreateDto)
         {
             var validationResult = await _createValidator.ValidateAsync(eventCreateDto);
-            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            if (!validationResult.IsValid) return ApiResponseFactory.ValidationError(validationResult, HttpContext);
             
             await _eventService.CreateEventAsync(eventCreateDto);
             return Ok();
@@ -50,7 +50,7 @@ namespace ApiMiniPrj.Api.Controllers.Events
         public async Task<IActionResult> Put(int id, [FromForm] EventUpdateDto eventUpdateDto)
         {
             var validationResult = await _updateValidator.ValidateAsync(eventUpdateDto);
-            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            if (!validationResult.IsValid) return ApiResponseFactory.ValidationError(validationResult, HttpContext);
             await _eventService.UpdateEventAsync(id, eventUpdateDto);
             return Ok();
         }
@@ -69,7 +69,7 @@ namespace ApiMiniPrj.Api.Controllers.Events
         public async Task<IActionResult> AddBannerImage(int Id, [FromForm] EventBannerImageUploadDto request)
         {
             var validationResult = await _bannerImageUploadValidator.ValidateAsync(request);
-            if (!validationResult.IsValid) return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+            if (!validationResult.IsValid) return ApiResponseFactory.ValidationError(validationResult, HttpContext);
             await _eventService.AddBannerImageAsync(Id, request.BannerImage!);
             return Ok();
         }

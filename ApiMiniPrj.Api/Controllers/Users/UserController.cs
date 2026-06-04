@@ -20,7 +20,6 @@
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllAsync();
-            if (users == null) return NotFound("No users found");
             return Ok(users);
         }
 
@@ -29,8 +28,6 @@
         public async Task<IActionResult> GetUserByEmail(string email)
         {
             var user = await _userService.GetByEmailAsync(email);
-            if (user == null)
-                return NotFound("User not found");
             return Ok(user);
         }
 
@@ -39,7 +36,7 @@
         {
             var validationResult = await _validator.ValidateAsync(userUpdateDto);
             if (!validationResult.IsValid)
-                return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+                return ApiResponseFactory.ValidationError(validationResult, HttpContext);
             await _userService.UpdateAsync(email, userUpdateDto);
             return Ok("User updated successfully");
         }
@@ -48,7 +45,7 @@
         [Authorize(Policy = "Permissions.Users.Delete")]
         public async Task<IActionResult> DeleteUser([FromQuery] string email)
         {
-            if (email == null) return BadRequest("Email is required");
+            if (email == null) return ApiResponseFactory.BadRequest("Email is required.", HttpContext);
             await _userService.DeleteAsync(email);
             return Ok("User deleted successfully");
         }

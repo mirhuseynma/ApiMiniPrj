@@ -1,5 +1,6 @@
 using ApiMiniPrj.Application.DTOs.Events;
 using ApiMiniPrj.Application.DTOs.Tickets;
+using ApiMiniPrj.Mvc.Common;
 using ApiMiniPrj.Mvc.Models.Tickets;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
@@ -298,20 +299,7 @@ namespace ApiMiniPrj.Mvc.Controllers
 
         private static async Task<string> ReadApiErrorAsync(HttpResponseMessage response)
         {
-            var content = await response.Content.ReadAsStringAsync();
-            if (string.IsNullOrWhiteSpace(content))
-            {
-                return $"Request failed ({(int)response.StatusCode} {response.ReasonPhrase}).";
-            }
-
-            try
-            {
-                return JsonSerializer.Deserialize<string>(content) ?? content;
-            }
-            catch (JsonException)
-            {
-                return content;
-            }
+            return await ApiErrorReader.ReadAsync(response);
         }
     }
 }

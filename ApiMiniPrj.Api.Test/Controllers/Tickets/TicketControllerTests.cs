@@ -29,7 +29,9 @@ public class TicketControllerTests
         var response = await controller.Post(new TicketCreateDto());
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(response);
-        Assert.Equal("Quantity must be greater than 0.", badRequest.Value);
+        var error = Assert.IsType<ApiErrorResponse>(badRequest.Value);
+        Assert.Equal(400, error.StatusCode);
+        Assert.Equal("Validation failed.", error.Message);
         Assert.False(service.CreateCalled);
     }
 

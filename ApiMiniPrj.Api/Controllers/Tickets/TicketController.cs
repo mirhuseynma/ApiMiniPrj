@@ -6,14 +6,12 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
     public class TicketController : ControllerBase
     {
         private readonly ITicketService _ticketService;
-        private readonly IAppDbContext _context;
         private readonly IValidator<TicketCreateDto> _createValidator;
         private readonly IValidator<TicketUpdateDto> _updateValidator;
 
         public TicketController(ITicketService ticketService, IAppDbContext appDbContext, IValidator<TicketCreateDto> createValidator, IValidator<TicketUpdateDto> updateValidator)
         {
             _ticketService = ticketService;
-            _context = appDbContext;
             _createValidator = createValidator;
             _updateValidator = updateValidator;
         }
@@ -34,17 +32,10 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
 
             if (!validationResult.IsValid)
             {
-                return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+                return ApiResponseFactory.ValidationError(validationResult, HttpContext);
             }
 
-            try
-            {
-                await _ticketService.CreateTicketAsync(ticketCreateDto);
-            }
-            catch (Exception ex) when (ex.Message == "Event not found.")
-            {
-                return BadRequest(ex.Message);
-            }
+            await _ticketService.CreateTicketAsync(ticketCreateDto);
 
             return Ok();
         }
@@ -53,15 +44,8 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
         [Authorize(Policy = "Permissions.Tickets.Delete")]
         public async Task<IActionResult> Delete(int id)
         {
-            try
-            {
-                await _ticketService.DeleteTicketAsync(id);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await _ticketService.DeleteTicketAsync(id);
+            return Ok();
         }
 
         [HttpPut("{id:int}")]
@@ -72,18 +56,11 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
 
             if (!validationResult.IsValid)
             {
-                return BadRequest(string.Join("\n", validationResult.Errors.Select(e => e.ErrorMessage)));
+                return ApiResponseFactory.ValidationError(validationResult, HttpContext);
             }
 
-            try
-            {
-                await _ticketService.UpdateTicketAsync(id, ticketUpdateDto);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
+            await _ticketService.UpdateTicketAsync(id, ticketUpdateDto);
+            return Ok();
         }
 
         [HttpGet("{id:int}")]
@@ -91,11 +68,6 @@ namespace ApiMiniPrj.Api.Controllers.Tickets
         public async Task<IActionResult> Get(int id)
         {
             var ticketDto = await _ticketService.GetTicketByIdAsync(id);
-            if (ticketDto is null)
-            {
-                return NotFound("Ticket not found.");
-            }
-
             return Ok(ticketDto);
         }
     }

@@ -20,5 +20,5 @@ global using ApiMiniPrj.Application.DTOs.Users;
 global using ApiMiniPrj.Application.Interfaces.User;
 global using System.Security.Claims;
 global using FluentValidation.Results;
-
+global using ApiMiniPrj.Api.Common.Responses;
 

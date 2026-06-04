@@ -16,13 +16,13 @@ namespace ApiMiniPrj.Persistence.Services
         {
             var existingUser = await _userManager.FindByEmailAsync(email);
             if (existingUser != null) await _userManager.DeleteAsync(existingUser);
-            else throw new Exception("User not found");
+            else throw new NotFoundException("User not found.");
         }
 
         public async Task<List<UserGetDto>> GetAllAsync()
         {
             var users = await _userManager.Users.ToListAsync();
-            if (users == null || users.Count == 0) throw new Exception("No users found");
+            if (users == null || users.Count == 0) throw new NotFoundException("No users found.");
             var userDtos = new List<UserGetDto>();
             foreach (var user in users)
             {
@@ -36,14 +36,14 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task<UserGetDto> GetByEmailAsync(string email)
         {
-            var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception("User not found");
+            var user = await _userManager.FindByEmailAsync(email) ?? throw new NotFoundException("User not found.");
             return _mapper.Map<UserGetDto>(user);
         }
 
 
         public async Task UpdateAsync(string email, UserUpdateDto userUpdateDto)
         {
-            var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception("User not found");
+            var user = await _userManager.FindByEmailAsync(email) ?? throw new NotFoundException("User not found.");
             user = _mapper.Map(userUpdateDto, user);
 
             await _userManager.UpdateAsync(user);
@@ -51,7 +51,7 @@ namespace ApiMiniPrj.Persistence.Services
 
         public async Task UpdateForAdminAsync(string email, UserUpdateForAdminDto userUpdateForAdminDto)
         {
-            var user = await _userManager.FindByEmailAsync(email) ?? throw new Exception("User not found");
+            var user = await _userManager.FindByEmailAsync(email) ?? throw new NotFoundException("User not found.");
             if (userUpdateForAdminDto.IsAdmin == false)
             {
                 if (await _userManager.IsInRoleAsync(user, "Admin"))

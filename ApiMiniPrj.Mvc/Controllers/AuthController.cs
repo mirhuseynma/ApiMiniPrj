@@ -1,10 +1,9 @@
 using ApiMiniPrj.Application.DTOs.Auth;
+using ApiMiniPrj.Mvc.Common;
 using ApiMiniPrj.Mvc.Models.Auth;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Text.Json;
 
 namespace ApiMiniPrj.Mvc.Controllers
 {
@@ -215,25 +214,7 @@ namespace ApiMiniPrj.Mvc.Controllers
 
         private static async Task<string> ReadApiErrorAsync(HttpResponseMessage response)
         {
-            var content = await response.Content.ReadAsStringAsync();
-            if (string.IsNullOrWhiteSpace(content))
-            {
-                return $"Request failed ({(int)response.StatusCode} {response.ReasonPhrase}).";
-            }
-
-            if (response.StatusCode == HttpStatusCode.UnsupportedMediaType)
-            {
-                return "Request format is not supported by the API.";
-            }
-
-            try
-            {
-                return JsonSerializer.Deserialize<string>(content) ?? content;
-            }
-            catch (JsonException)
-            {
-                return content;
-            }
+            return await ApiErrorReader.ReadAsync(response);
         }
     }
 }

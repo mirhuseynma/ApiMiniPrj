@@ -19,16 +19,14 @@ public class AuthControllerTests
     }
 
     [Fact]
-    public async Task Register_WhenServiceThrowsArgumentException_ShouldReturnBadRequest()
+    public async Task Register_WhenServiceThrowsArgumentException_ShouldLetMiddlewareHandleException()
     {
         var service = new RecordingAuthService { RegisterException = new ArgumentException("Duplicate email.") };
         var controller = CreateController(service);
         var dto = new RegisterDto { FullName = "Test User", Email = "test@example.com", UserName = "test", Password = "Password123", RePassword = "Password123", AcceptTerms = true };
 
-        var response = await controller.Register(dto);
-
-        var badRequest = Assert.IsType<BadRequestObjectResult>(response);
-        Assert.Equal("Duplicate email.", badRequest.Value);
+        var exception = await Assert.ThrowsAsync<ArgumentException>(() => controller.Register(dto));
+        Assert.Equal("Duplicate email.", exception.Message);
     }
 
     [Fact]
@@ -40,7 +38,9 @@ public class AuthControllerTests
         var response = await controller.Login(new LoginDto());
 
         var badRequest = Assert.IsType<BadRequestObjectResult>(response);
-        Assert.Equal("Password is required.", badRequest.Value);
+        var error = Assert.IsType<ApiErrorResponse>(badRequest.Value);
+        Assert.Equal(400, error.StatusCode);
+        Assert.Equal("Validation failed.", error.Message);
         Assert.False(service.LoginCalled);
     }
 

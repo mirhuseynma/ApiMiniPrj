@@ -54,6 +54,7 @@ global using System.Text;
 
 global using ApiMiniPrj.Application.DTOs.Users;
 global using ApiMiniPrj.Domain.Models;
+global using ApiMiniPrj.Application.Common.Exceptions;
 
 
 
