@@ -1,8 +1,7 @@
 <Solution>
-  <Folder Name="/Solution Items/">
+  <Folder Name="/src/">
     <File Path="docker-compose.yml" />
   </Folder>
-  <Folder Name="/src/" />
   <Folder Name="/src/Core/">
     <Project Path="ApiMiniPrj.Application/ApiMiniPrj.Application.csproj" />
     <Project Path="ApiMiniPrj.Domain/ApiMiniPrj.Domain.csproj" />

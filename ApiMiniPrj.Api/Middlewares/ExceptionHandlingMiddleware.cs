@@ -29,6 +29,8 @@ namespace ApiMiniPrj.Api.Middlewares
 
         private async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
+            var isdevelopment = context.RequestServices.GetRequiredService<IWebHostEnvironment>().IsDevelopment();
+
             var statusCode = exception switch
             {
                 NotFoundException => StatusCodes.Status404NotFound,
@@ -50,6 +52,13 @@ namespace ApiMiniPrj.Api.Middlewares
                 Message = statusCode == StatusCodes.Status500InternalServerError
                     ? "An unexpected error occurred."
                     : exception.Message,
+                Errors = !isdevelopment ? new Dictionary<string, string[]>
+                {
+                    ["Exception"] = [exception.GetType().Name],
+                    ["Message"] = [exception.Message],
+                    ["Source"] = [exception.Source ?? string.Empty],
+                    ["Path"] = [context.Request.Path.ToString()]
+                } : null,
                 TraceId = context.TraceIdentifier
             };
 

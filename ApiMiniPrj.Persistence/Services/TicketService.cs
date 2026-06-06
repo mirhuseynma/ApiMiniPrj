@@ -54,6 +54,11 @@ namespace ApiMiniPrj.Persistence.Services
                 .Include(t => t.Event)
                 .ToListAsync();
 
+            if (!tickets.Any())
+            {
+                throw new NotFoundException("No tickets found.");
+            }
+
             return _mapper.Map<IEnumerable<GetTicketDto>>(tickets);
         }
 

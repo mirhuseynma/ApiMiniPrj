@@ -37,7 +37,6 @@ namespace ApiMiniPrj.Api.Controllers.Auth
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromForm] LoginDto loginDto)
         {
-            throw new NotImplementedException("salam");
             var validationResult = await _loginValidator.ValidateAsync(loginDto);
             if (!validationResult.IsValid) return ApiResponseFactory.ValidationError(validationResult, HttpContext);
 

@@ -8,7 +8,7 @@ namespace ApiMiniPrj.Api.Common.Responses
                 .GroupBy(e => e.PropertyName)
                 .ToDictionary(
                     group => group.Key,
-                    group => group.Select(e => e.ErrorMessage).ToArray());
+                    group => group.Select(e => e.ErrorMessage).ToArray()) ;
 
             return new BadRequestObjectResult(new ApiErrorResponse
             {

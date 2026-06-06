@@ -10,7 +10,7 @@ namespace ApiMiniPrj.Application
 {
     public static class DependencyInjection
     {
-        public static IServiceCollection AddApplication(this IServiceCollection services,IConfiguration configuration)
+        public static IServiceCollection AddApplication(this IServiceCollection services, IConfiguration configuration)
         {
             services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(DependencyInjection).Assembly));
             services.AddHttpContextAccessor();
@@ -25,6 +25,35 @@ namespace ApiMiniPrj.Application
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(options =>
             {
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = async context =>
+                    {
+                        context.HandleResponse();
+
+                        context.Response.StatusCode = 401;
+                        context.Response.ContentType = "application/json";
+
+                        await context.Response.WriteAsJsonAsync(new 
+                        {
+                            StatusCode = 401,
+                            Message = "Unauthorized. Token is missing or invalid.",
+                            TraceId = context.HttpContext.TraceIdentifier
+                        });
+                    },
+
+                    OnForbidden = async context =>
+                    {
+                        context.Response.StatusCode = 403;
+                        context.Response.ContentType = "application/json";
+                        await context.Response.WriteAsJsonAsync(new
+                        {
+                            StatusCode = 403,
+                            Message = "Forbidden. You do not have permission to access this resource.",
+                            TraceId = context.HttpContext.TraceIdentifier
+                        });
+                    }
+                };
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
