@@ -52,6 +52,15 @@ namespace ApiMiniPrj.Persistence.Seeds
                 }
             }
 
+            if (adminUser  != null)
+            {
+                if(!adminUser.EmailConfirmed)
+                {
+                    adminUser.EmailConfirmed = true;
+                    await userManager.UpdateAsync(adminUser);
+                }
+            }
+
             await SeedRolesAndAdminAsync(roleManager, "Admin", Permissions.All());
             await SeedRolesAndAdminAsync(roleManager, "User", [Permissions.Events.View, Permissions.Tickets.View]);
             await SeedRolesAndAdminAsync(roleManager, "Organizer", 
